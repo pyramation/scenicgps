@@ -1,2 +1,3 @@
 scenicgps/constants.py
-./**/*.pyc
+scenicgps/*.pyc
+scenicgps/scenic/*.pyc
