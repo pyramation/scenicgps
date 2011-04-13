@@ -1,3 +1,5 @@
 scenicgps/constants.py
 scenicgps/*.pyc
 scenicgps/scenic/*.pyc
+tmp
+tmp/*
