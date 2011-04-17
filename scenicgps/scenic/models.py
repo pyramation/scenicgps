@@ -17,3 +17,10 @@ class Rating(models.Model):
     rating = models.IntegerField()
     class Meta:
         unique_together = ("device", "route")
+
+class PlaceRating(models.Model):
+    device = models.ForeignKey(Device)
+    geopt  = models.ForeignKey(GeoPt, related_name="%(app_label)s_%(class)s_related")
+    rating = models.IntegerField()
+    class Meta:
+        unique_together = ("device", "geopt")
