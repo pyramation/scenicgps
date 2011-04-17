@@ -37,8 +37,8 @@ def putRoute(request):
 
 
 def ratePlace(request):
-	lat = request.GET['lat']
-	lng = request.GET['lng']
+	lat = float(request.GET['lat'])
+	lng = float(request.GET['lng'])
 	rating = int(request.GET['rating'])
 	device = request.GET['device']
 	try:
