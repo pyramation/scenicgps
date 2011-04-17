@@ -13,20 +13,20 @@ def putRoute(request):
     device = request.GET['device']
     try:
 
-	try:
+	    try:
             rte = Route.objects.get(plString = plString)
-	except:
+	    except:
             rte = Route(plString = plString)
-	    rte.save()
+	        rte.save()
 
-	try:
+	    try:
             dev=Device.objects.get(device=device)
         except:
             dev=Device(device=device)
             dev.save()
 
         try:
-	    rate = Rating.objects.get(route = rte, device = dev)
+	        rate = Rating.objects.get(route = rte, device = dev)
             rate.rating = rating
             rate.save()
         except:
