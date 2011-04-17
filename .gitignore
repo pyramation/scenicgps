@@ -1,3 +1,4 @@
+passenger_wsgi.pyc
 scenicgps/constants.py
 scenicgps/*.pyc
 scenicgps/scenic/*.pyc
