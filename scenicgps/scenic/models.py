@@ -1,26 +1,166 @@
+#from django.contrib.gis.db import models
 from django.db import models
+
+
+def getOrCreate(cls):
+    return cls.objects.get_or_create
+
+def getVal(request,key):
+    try:
+        return request.GET[key]
+    except:
+        return None
+
+def getRating(request):
+    KEY = 'rating'
+    return int(getVal(request,KEY))
+
+
 
 # Create your models here.
 class GeoPt(models.Model):
+    LATKEY = 'lat'
+    LNGKEY = 'lng'
     lat = models.FloatField()
     lng = models.FloatField()
+    
+    @classmethod
+    def getor(cls,request):
+        return getOrCreate(cls)(lat=cls.getLat(request),lng=cls.getLng(request))
+
+    @classmethod
+    def getLat(cls,request):
+        return getVal(request,cls.LATKEY)
+
+    @classmethod
+    def getLng(cls,request):
+        return getVal(request,cls.LNGKEY)
+    
+
+        
+        
+        
 
 class Route(models.Model):
-    plString = models.CharField(max_length=1000)
+    PLKEY = 'plstring'
 
-class Device(models.Model):
-    device = models.CharField(max_length=40, unique=True)
+    plString = models.CharField(max_length=3000)
+    
+    @classmethod
+    def getor(cls,request):
+        return getOrCreate(cls)(plString = cls.getPL(request))
 
-class Rating(models.Model):
-    device = models.ForeignKey(Device)
+    @classmethod
+    def getPL(cls, request):
+        return getVal(request,cls.PLKEY)
+
+    @classmethod
+    def rateRoute(cls,request):
+        route = cls.getor(request)
+        rating = getRating(request)
+        user = User.getor(request)
+        RouteRating.setRating(route,user,rating)
+
+class User(models.Model):
+    DEVKEY = 'deviceid'
+    device_id = models.CharField(max_length=40, unique = True)
+
+    @classmethod
+    def getor(cls,request):
+        return getOrCreate(cls)(device_id=getVal(request,cls.DEVKEY))
+        
+
+class RouteRating(models.Model):
+    user = models.ForeignKey(User)
     route  = models.ForeignKey(Route, related_name="%(app_label)s_%(class)s_related")
     rating = models.IntegerField()
     class Meta:
-        unique_together = ("device", "route")
+        unique_together = ("user", "route")
 
-class PlaceRating(models.Model):
-    device = models.ForeignKey(Device)
-    geopt  = models.ForeignKey(GeoPt, related_name="%(app_label)s_%(class)s_related")
+    @classmethod
+    def getor(cls, route, user):
+        return getOrCreate(cls)(route = route, user = user)
+
+    @classmethod
+    def setRating(cls, route, user, rating):
+        rtrating = cls.getor(route,user)
+        rtrating.rating = rating
+        rtrating.save()
+
+class ScenicContent(models.Model):
+    TITLEKEY = 'title'
+    title = models.CharField(max_length=200)
+    geopt = models.ForeignKey(GeoPt, related_name='%(app_label)s_%(class)s_related')
+
+    @classmethod
+    def getor(cls,request):
+        getOrCreate(cls)(title=getVal(request,TITLEKEY), geopt = GeoPt.getor(request))
+
+
+    def rate(self, request):
+        rating = getRating(request)
+        contentRating = ContentRating.getor(request)
+
+
+    @classmethod
+    def getTitle(cls, request):
+        return getVal(request,cls.TITLEKEY)
+
+    @classmethod
+    def setRating(cls, content, request):
+        user = User.getor(request)
+        rating = getRating(request)
+        content.setRating(user,rating)
+
+    
+    def setRating(self, user, rating):
+        ContentRating.setRating(self, user,rating)
+
+
+    
+
+class PanoramioContent(ScenicContent):
+    URLKEY = 'contenturl'
+    url = models.URLField(blank=False)
+    
+    @classmethod
+    def getor(cls,request):
+        title = cls.getTitle(request)
+        url = cls.getURL(request)
+        geopt = GeoPt.getor(request)
+        return getOrCreate(cls)(title=title, url = url, geopt = geopt)
+
+    @classmethod
+    def getURL(cls, request):
+        return getVal(request, cls.URLKEY)
+
+
+class UserContent(ScenicContent):
+    user = models.ForeignKey(User)
+
+    
+
+
+
+class UserPicture(UserContent):
+    picture = models.FileField(upload_to = 'images',blank=False)
+
+class UserComment(UserContent):
+    comment = models.TextField()
+
+
+class ContentRating(models.Model):
+    user = models.ForeignKey(User)
+    content = models.ForeignKey(ScenicContent)
     rating = models.IntegerField()
     class Meta:
-        unique_together = ("device", "geopt")
+        unique_together = ("user", "content")
+
+    @classmethod
+    def getor(cls, content, user):
+        return getOrCreate(cls)(content = content, user = user)
+    @classmethod
+    def setRating(cls, content, user, rating):
+        cRating = cls.getor(content,user)
+        cRating.rating = rating
+        cRating.save()
