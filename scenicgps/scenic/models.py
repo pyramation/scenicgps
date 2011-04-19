@@ -2,12 +2,15 @@
 from django.db import models
 
 
-def getOrCreate(cls):
-    return cls.objects.get_or_create
+def getOrCreate(cls, **kwargs):
+    return cls.objects.get_or_create(**kwargs)[0]
 
 def getVal(request,key):
     try:
-        return request.GET[key]
+        result = request.GET[key]
+        if isinstance(result,str) or isinstance(result,unicode):
+            return result
+        return result[0]
     except:
         return None
 
@@ -26,15 +29,16 @@ class GeoPt(models.Model):
     
     @classmethod
     def getor(cls,request):
-        return getOrCreate(cls)(lat=cls.getLat(request),lng=cls.getLng(request))
+        return getOrCreate(cls,lat=cls.getLat(request),lng=cls.getLng(request))
 
     @classmethod
     def getLat(cls,request):
-        return getVal(request,cls.LATKEY)
+        return float(getVal(request,cls.LATKEY))
 
     @classmethod
     def getLng(cls,request):
-        return getVal(request,cls.LNGKEY)
+        val = getVal(request,cls.LNGKEY)
+        return float(val)
     
 
         
@@ -48,7 +52,7 @@ class Route(models.Model):
     
     @classmethod
     def getor(cls,request):
-        return getOrCreate(cls)(plString = cls.getPL(request))
+        return getOrCreate(cls,plString = cls.getPL(request))
 
     @classmethod
     def getPL(cls, request):
@@ -67,19 +71,19 @@ class User(models.Model):
 
     @classmethod
     def getor(cls,request):
-        return getOrCreate(cls)(device_id=getVal(request,cls.DEVKEY))
+        return getOrCreate(cls,device_id=getVal(request,cls.DEVKEY))
         
 
 class RouteRating(models.Model):
     user = models.ForeignKey(User)
     route  = models.ForeignKey(Route, related_name="%(app_label)s_%(class)s_related")
-    rating = models.IntegerField()
+    rating = models.IntegerField(default=0)
     class Meta:
         unique_together = ("user", "route")
 
     @classmethod
     def getor(cls, route, user):
-        return getOrCreate(cls)(route = route, user = user)
+        return getOrCreate(cls,route = route, user = user)
 
     @classmethod
     def setRating(cls, route, user, rating):
@@ -94,7 +98,7 @@ class ScenicContent(models.Model):
 
     @classmethod
     def getor(cls,request):
-        getOrCreate(cls)(title=getVal(request,TITLEKEY), geopt = GeoPt.getor(request))
+        getOrCreate(cls,title=getVal(request,TITLEKEY), geopt = GeoPt.getor(request))
 
 
     def rate(self, request):
@@ -107,13 +111,13 @@ class ScenicContent(models.Model):
         return getVal(request,cls.TITLEKEY)
 
     @classmethod
-    def setRating(cls, content, request):
+    def setRating(cls,content, request):
         user = User.getor(request)
         rating = getRating(request)
-        content.setRating(user,rating)
+        content.setMyRating(user,rating)
 
     
-    def setRating(self, user, rating):
+    def setMyRating(self, user, rating):
         ContentRating.setRating(self, user,rating)
 
 
@@ -128,7 +132,7 @@ class PanoramioContent(ScenicContent):
         title = cls.getTitle(request)
         url = cls.getURL(request)
         geopt = GeoPt.getor(request)
-        return getOrCreate(cls)(title=title, url = url, geopt = geopt)
+        return getOrCreate(cls,title=title, url = url, geopt = geopt)
 
     @classmethod
     def getURL(cls, request):
@@ -152,13 +156,14 @@ class UserComment(UserContent):
 class ContentRating(models.Model):
     user = models.ForeignKey(User)
     content = models.ForeignKey(ScenicContent)
-    rating = models.IntegerField()
+    rating = models.IntegerField(default=0)
     class Meta:
         unique_together = ("user", "content")
 
     @classmethod
     def getor(cls, content, user):
-        return getOrCreate(cls)(content = content, user = user)
+        return getOrCreate(cls,content = content, user = user)
+
     @classmethod
     def setRating(cls, content, user, rating):
         cRating = cls.getor(content,user)

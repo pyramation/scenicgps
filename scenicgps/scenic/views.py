@@ -14,6 +14,6 @@ def putRoute(request):
 	Route.rateRoute(request)
 
 @postMethod
-def ratePlace(request):
+def ratePanoramio(request):
 	ScenicContent.setRating(PanoramioContent.getor(request), request)
 
