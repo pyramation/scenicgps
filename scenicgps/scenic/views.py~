@@ -13,7 +13,10 @@ def index(request):
 def putRoute(request):
 	Route.rateRoute(request)
 
-#@postMethod
+@postMethod
 def ratePanoramio(request):
 	ScenicContent.setRating(PanoramioContent.getor(request), request)
 
+#@getMethod
+def lastRoute(request):
+	return HttpResponse({Route.PLKEY : Route.lastRoute().plString})

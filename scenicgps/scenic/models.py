@@ -1,7 +1,6 @@
 #from django.contrib.gis.db import models
 from django.db import models
 
-
 def getOrCreate(cls, **kwargs):
     return cls.objects.get_or_create(**kwargs)[0]
 
@@ -47,12 +46,18 @@ class GeoPt(models.Model):
 
 class Route(models.Model):
     PLKEY = 'plstring'
+    date = models.DateTimeField(auto_now=True)
 
     plString = models.CharField(max_length=3000)
     
     @classmethod
     def getor(cls,request):
         return getOrCreate(cls,plString = cls.getPL(request))
+
+    @classmethod
+    def lastRoute(cls):
+        return cls.objects.order_by('-date')[0]
+        
 
     @classmethod
     def getPL(cls, request):

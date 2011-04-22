@@ -5,6 +5,7 @@ from django.utils.simplejson import dumps
 SUC_VAL = 'ok'
 ERR_VAL = 'error'
 STATUS_KEY = 'status'
+RESPONSE_KEY = 'response'
 
 def jsonRes(dic):
 	return HttpResponse(dumps(dic))
@@ -13,12 +14,28 @@ def success():
 	return jsonRes({STATUS_KEY: SUC_VAL})
 def error():
 	return jsonRes({STATUS_KEY: ERR_VAL})
+
+
+
 def postMethod(f):
-	def new_f():
+	def new_f(request):
 		try:
-			f()
+			f(request)
 			return success()
 		except:
 			return error()
 	return new_f
 	
+def getMethod(f):
+	def new_f(request):
+		try:
+			return getResponse(f(request))
+		except:
+			return error()
+	return new_f
+
+def getResponse(response):
+	suc = success()
+	res = {RESPONSE_KEY:response}
+	res.udpate(suc)
+	return jsonRes(res)

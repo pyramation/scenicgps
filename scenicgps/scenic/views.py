@@ -17,3 +17,6 @@ def putRoute(request):
 def ratePanoramio(request):
 	ScenicContent.setRating(PanoramioContent.getor(request), request)
 
+@getMethod
+def lastRoute(request):
+	return {Route.PLKEY : Route.lastRoute().plString}
