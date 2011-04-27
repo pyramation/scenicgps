@@ -1,6 +1,6 @@
 #from django.contrib.gis.db import models
 from django.db import models
-
+import os
 def getOrCreate(cls, **kwargs):
     return cls.objects.get_or_create(**kwargs)[0]
 
@@ -103,7 +103,7 @@ class ScenicContent(models.Model):
 
     @classmethod
     def getor(cls,request):
-        getOrCreate(cls,title=getVal(request,TITLEKEY), geopt = GeoPt.getor(request))
+        return getOrCreate(cls,title=getVal(request,TITLEKEY), geopt = GeoPt.getor(request))
 
 
     def rate(self, request):
@@ -152,7 +152,29 @@ class UserContent(ScenicContent):
 
 
 class UserPicture(UserContent):
-    picture = models.FileField(upload_to = 'images',blank=False)
+
+    @staticmethod
+    def get_image_path(instance, filename):
+        return os.path.join('photos',str(instance.id),filename)
+
+
+
+    picture = models.ImageField(upload_to=get_image_path,blank=False)
+    IMG_KEY = 'image'
+
+
+    @classmethod
+    def putPhoto(cls, request):
+        photo = cls.getor(request)
+        image = cls.getImage(request)
+        photo.picture.save(image.name, image)
+
+    @classmethod
+    def getImage(cls,request):
+        if request.method == 'POST':
+            form = PhotoForm(request.POST, request.FILES)
+            if form.is_valid():
+                return request.FILES[IMG_KEY]
 
 class UserComment(UserContent):
     comment = models.TextField()

@@ -3,5 +3,6 @@ from django.conf.urls.defaults import *
 urlpatterns = patterns('scenic.views',
     (r'^putroute$','putRoute'),
     (r'^panrate$','ratePanoramio'),
+    (r'^lastroute$','lastRoute'),
     (r'^$', 'index'),
 )

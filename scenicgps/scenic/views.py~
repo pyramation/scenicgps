@@ -9,6 +9,12 @@ from scenicgps.utils import *
 def index(request):
 	pass
 
+
+@postMethod
+def uploadPhoto(request):
+	if request.method == 'POST':
+		form = PhotoForm
+
 @postMethod
 def putRoute(request):
 	Route.rateRoute(request)
@@ -17,6 +23,6 @@ def putRoute(request):
 def ratePanoramio(request):
 	ScenicContent.setRating(PanoramioContent.getor(request), request)
 
-#@getMethod
+@getMethod
 def lastRoute(request):
-	return HttpResponse({Route.PLKEY : Route.lastRoute().plString})
+	return {Route.PLKEY : Route.lastRoute().plString}

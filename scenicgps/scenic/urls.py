@@ -4,5 +4,7 @@ urlpatterns = patterns('scenic.views',
     (r'^putroute$','putRoute'),
     (r'^panrate$','ratePanoramio'),
     (r'^lastroute$','lastRoute'),
+    (r'^uploadphoto$', 'uploadPhoto'),
     (r'^$', 'index'),
+                     
 )
