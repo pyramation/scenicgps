@@ -1,5 +1,5 @@
 # Django settings for scenicgps project.
-from constants import DATABASES
+from constants import *
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
