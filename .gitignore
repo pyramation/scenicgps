@@ -4,3 +4,5 @@ scenicgps/*.pyc
 scenicgps/scenic/*.pyc
 tmp
 tmp/*
+public/media/photos/*
+public/media/photos

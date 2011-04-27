@@ -1,5 +1,5 @@
 # Django settings for scenicgps project.
-from constants import DATABASES
+from constants import *
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -36,7 +36,7 @@ USE_L10N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/home/scenicgps/scenicgps.com/public/media'
+
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).

@@ -1,6 +1,8 @@
 #from django.contrib.gis.db import models
 from django.db import models
 import os
+from django.forms import Form as PhotoForm
+
 def getOrCreate(cls, **kwargs):
     return cls.objects.get_or_create(**kwargs)[0]
 
@@ -9,7 +11,8 @@ def getVal(request,key):
         result = request.GET[key]
         if isinstance(result,str) or isinstance(result,unicode):
             return result
-        return result[0]
+        result =  result[0]
+        asdfasd
     except:
         return None
 
@@ -103,8 +106,16 @@ class ScenicContent(models.Model):
 
     @classmethod
     def getor(cls,request):
-        return getOrCreate(cls,title=getVal(request,TITLEKEY), geopt = GeoPt.getor(request))
+        
+        content = getOrCreate(cls, **cls.getkwargs(request))
+        return content
 
+    @classmethod
+    def getkwargs(cls,request):
+        title = getVal(request,cls.TITLEKEY)
+        geopt = GeoPt.getor(request)
+        return {'title':title,'geopt':geopt}
+        
 
     def rate(self, request):
         rating = getRating(request)
@@ -147,32 +158,49 @@ class PanoramioContent(ScenicContent):
 class UserContent(ScenicContent):
     user = models.ForeignKey(User)
 
-    
+    @classmethod
+    def getor(cls, request):
+        user = User.getor(request)
+        content = getOrCreate(cls, **ScenicContent.getkwargs(request))
+        content.user = user
+        return content
+
+    @classmethod
+    def getkwargs(cls, request):
+        kw = cls.__bases__[0].getkwargs(request)
+        kw['user'] = User.getor(request)
+        return kw
 
 
 
 class UserPicture(UserContent):
-    picture = models.ImageField(upload_to=get_image_path,blank=False)
-    IMG_KEY = 'image'
 
     @staticmethod
     def get_image_path(instance, filename):
         return os.path.join('photos',str(instance.id),filename)
 
-    print get_image_path('asdf','asdf')
+
+
+    picture = models.ImageField(upload_to=get_image_path,blank=False)
+    IMG_KEY = 'image'
+
 
     @classmethod
     def putPhoto(cls, request):
-        photo = cls.getor(request)
+        content = getOrCreate(cls, **UserContent.getkwargs(request))
         image = cls.getImage(request)
-        photo.picture.save(image.name, image)
+        content.save()
+        content.picture.save(image.name, image)
+
 
     @classmethod
     def getImage(cls,request):
         if request.method == 'POST':
             form = PhotoForm(request.POST, request.FILES)
             if form.is_valid():
-                return request.FILES[IMG_KEY]
+                image_file = request.FILES[cls.IMG_KEY]
+                return image_file
+                
 
 class UserComment(UserContent):
     comment = models.TextField()

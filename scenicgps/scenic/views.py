@@ -10,11 +10,12 @@ def index(request):
 	pass
 
 
-@postMethod
+
 @csrf_exempt
+@postMethod
 def uploadPhoto(request):
 	if request.method == 'POST':
-		form = PhotoForm
+		UserPicture.putPhoto(request)
 
 @postMethod
 def putRoute(request):

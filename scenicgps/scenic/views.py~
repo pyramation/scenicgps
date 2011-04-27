@@ -1,7 +1,7 @@
 # Create your views here.
 from scenicgps.scenic.models import *
 from scenicgps.utils import *
-
+from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -10,10 +10,12 @@ def index(request):
 	pass
 
 
+
+@csrf_exempt
 @postMethod
 def uploadPhoto(request):
-	if request.method == 'POST':
-		form = PhotoForm
+#	if request.method == 'POST':
+		UserPicture.putPhoto(request)
 
 @postMethod
 def putRoute(request):
