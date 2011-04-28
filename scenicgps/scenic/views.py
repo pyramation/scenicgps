@@ -32,3 +32,7 @@ def lastRoute(request):
 @getMethod
 def userPhotos(request):
 	return {UserPicture.SET_KEY : UserPicture.fetchPictures(request)}
+
+@getMethod
+def allUserPhotos(request):
+	return {UserPicture.SET_KEY : UserPicture.fetchAllPictures(request)}

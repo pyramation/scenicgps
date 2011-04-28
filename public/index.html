@@ -25,7 +25,7 @@
 		var geoHashes = [];
 
 		$.ajax({
-			url: '/scenic/getuserphotos',
+			url: '/scenic/getallphotos',
 			success: function(recv) {
 				data = jQuery.parseJSON(recv);
 				data = data['response'].photos;

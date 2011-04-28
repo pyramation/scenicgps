@@ -214,10 +214,14 @@ class UserPicture(UserContent):
         return 'http://www.scenicgps.com' + self.picture.url
 
     @classmethod
+    def fetchAllPictures(cls, request):
+        pics = cls.objects.all()
+        return [pic.toDic() for pic in pics]
+
+    @classmethod
     def fetchPictures(cls, request):
         pics = cls.objects.all()[:10]
         return [pic.toDic() for pic in pics]
-        
 
     @classmethod
     def putPhoto(cls, request):
