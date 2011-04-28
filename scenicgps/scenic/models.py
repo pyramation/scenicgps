@@ -28,6 +28,12 @@ class GeoPt(models.Model):
     LNGKEY = 'lng'
     lat = models.FloatField()
     lng = models.FloatField()
+
+    def toDic(self):
+        dic = {}
+        dic[GeoPt.LATKEY] = self.lat
+        dic[GeoPt.LNGKEY] = self.lng
+        return dic
     
     @classmethod
     def getor(cls,request):
@@ -77,6 +83,10 @@ class User(models.Model):
     DEVKEY = 'deviceid'
     device_id = models.CharField(max_length=40, unique = True)
 
+    def toDic(self):
+        return self.device_id
+
+    
     @classmethod
     def getor(cls,request):
         return getOrCreate(cls,device_id=getVal(request,cls.DEVKEY))
@@ -101,8 +111,16 @@ class RouteRating(models.Model):
 
 class ScenicContent(models.Model):
     TITLEKEY = 'title'
+    COORD_KEY = 'coord'
     title = models.CharField(max_length=200)
     geopt = models.ForeignKey(GeoPt, related_name='%(app_label)s_%(class)s_related')
+
+
+    def toDic(self):
+        dic = {}
+        dic[ScenicContent.TITLEKEY] = self.title
+        dic[ScenicContent.COORD_KEY] = self.geopt.toDic()
+        return dic
 
     @classmethod
     def getor(cls,request):
@@ -157,7 +175,8 @@ class PanoramioContent(ScenicContent):
 
 class UserContent(ScenicContent):
     user = models.ForeignKey(User)
-
+    USER_KEY = 'user'
+    
     @classmethod
     def getor(cls, request):
         user = User.getor(request)
@@ -165,6 +184,11 @@ class UserContent(ScenicContent):
         content.user = user
         return content
 
+    def toDic(self):
+        dic = super(UserContent,self).toDic()
+        dic.update({UserContent.USER_KEY: self.user.toDic()})
+        return dic
+    
     @classmethod
     def getkwargs(cls, request):
         kw = cls.__bases__[0].getkwargs(request)
@@ -178,7 +202,22 @@ def get_image_path(instance, filename):
 class UserPicture(UserContent):
     picture = models.ImageField(upload_to=get_image_path,blank=False)
     IMG_KEY = 'image'
+    SET_KEY = 'photos'
 
+
+    def toDic(self):
+        dic = super(UserPicture, self).toDic()
+        dic.update({UserPicture.IMG_KEY:self.picURL()})
+        return dic
+
+    def picURL(self):
+        return 'http://www.scenicgps.com' + self.picture.url
+
+    @classmethod
+    def fetchPictures(cls, request):
+        pics = cls.objects.all()[:10]
+        return [pic.toDic() for pic in pics]
+        
 
     @classmethod
     def putPhoto(cls, request):

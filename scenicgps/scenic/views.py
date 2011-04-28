@@ -28,3 +28,7 @@ def ratePanoramio(request):
 @getMethod
 def lastRoute(request):
 	return {Route.PLKEY : Route.lastRoute().plString}
+
+@getMethod
+def userPhotos(request):
+	return {UserPicture.SET_KEY : UserPicture.fetchPictures(request)}
