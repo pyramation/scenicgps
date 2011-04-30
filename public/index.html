@@ -60,21 +60,73 @@
 		<script type="text/javascript">
 			//< ![CDATA[
 		var data;
-		var geoHashes = [];
+		var mMap;
+		var geoHashes = new Array();
 
 		$.ajax({
 			url: '/scenic/getallphotos',
 			success: function(recv) {
 				data = jQuery.parseJSON(recv);
 				data = data['response'].photos;
-				hashData();
+				createMap();
 				run();
 			}
 		});
 
+		function getHashLevel() {
+
+    			var zoom = mMap.getZoom();
+
+			switch(zoom) {
+				case 0: return 1; 
+				case 1: return 1; 
+				case 2: return 1; 
+				case 3: return 1; 
+				case 4: return 1; 
+				case 5: return 1; 
+				case 6: return 2; 
+				case 7: return 3; 
+				case 8: return 4; 
+				case 9: return 4; 
+				case 10: return 4; 
+				case 11: return 5; 
+				case 12: return 6; 
+				case 13: return 6; 
+				case 14: return 7; 
+				case 15: return 7; 
+				case 16: return 7; 
+				case 17: return 8; 
+				case 18: return 9; 
+				case 19: return 10; 
+				case 20: return 10; 
+				case 21: return 11; 
+			}
+
+
+    			var a, b, u, v;
+    			// zoom levels
+    			a = 8;
+    			b = 14;
+    			// string matches
+    			u = 3;
+    			v = 7;
+    			with (Math) {
+         			level = parseInt(u + (zoom-a) * (v-u)/(b-a));
+    			}
+			return level;
+		}
+
+		function getHash(obj, level) {
+			var geoHash = encodeGeoHash(obj.coord.lat, obj.coord.lng);
+        		return geoHash.substring(0,level);
+		}
+
 		function hashData() {
+			delete geoHashes;
+			geoHashes = new Array();
+			var level = getHashLevel();
 			$.each(data, function(i, c) {
-				var geoHash = encodeGeoHash(c.coord.lat, c.coord.lng);
+				var geoHash = getHash(c, level);
 				if (geoHashes[geoHash]) {
 					geoHashes[geoHash].push( {title:c.title, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash } );
 				} else {
@@ -85,8 +137,8 @@
 			});	
 		}
 
-		function createMarker(point,html) {
-			var marker = new GMarker(point);
+		function createMarker(point,html, icon) {
+			var marker = new GMarker(point, {icon: icon});
 			GEvent.addListener(marker, "click", function() {
 
 				$('#display').html(html);
@@ -94,6 +146,7 @@
 				marker.openInfoWindowHtml(html);
 
 			});
+
 			return marker;
 		}
 
@@ -107,29 +160,53 @@
 			str += '<img width="50px" height="50px" src="'+ src + '"></a>';
 			return str;
 		}
-		function run() {
+
+
+
+
+
+		function createMap() {
 
 			if (GBrowserIsCompatible()) {
 
 				var map = new GMap2(document.getElementById("map"));
+				mMap = map;
 				map.addControl(new GLargeMapControl());
 				map.addControl(new GMapTypeControl());
 				map.setCenter(new GLatLng(37.8715926,-122.2727470), 14);
+				GEvent.addListener(map, "zoomend", function() {
+					run();
+				});
+
+			}		
+		}
+
+		function run() {
+				mMap.clearOverlays();
+	
+				hashData();
 
 				for(x in geoHashes) {
 					var content = '';
 					var point;
+					var imagesrc = '';
 					$.each(geoHashes[x], function(i,y) {
 						point = new GLatLng( y.lat,y.lng);
 						content += displayContent(y) + "<br>";
+						imagesrc = (getExtension(y.image) ==='mov') ? "images/video.png"  : y.image;
 					});
 
-					var marker = createMarker(point,content);
-					map.addOverlay(marker); 
+  					var icon = new GIcon(); 
+    					icon.image = imagesrc;
+    					icon.shadow = imagesrc;
+    					icon.iconSize = new GSize(36, 42);
+    					icon.shadowSize = new GSize(36, 42);
+    					icon.iconAnchor = new GPoint(6, 20);
+    					icon.infoWindowAnchor = new GPoint(5, 1);
 
-
+					var marker = createMarker(point,content, icon);
+					mMap.addOverlay(marker); 
 				}
-			}		
 		}
 
 //]]>
