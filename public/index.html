@@ -14,7 +14,7 @@
 		<style>
 			body {
  				background-color: #F3F3F3;
-    				font-family: Verdana, Helvetica, Arial;
+				font-family: Helvetica,Arial,sans-serif;
     				font-size: 14px;
 			}
 			.annotationText { font-size: 8pt; font-variant: small-caps; } 
@@ -42,32 +42,21 @@
     				line-height: 24px;
     				text-shadow:1px 1px 2px #333333;
 			}
-			#title{
-				width: 750px;
-				margin: 0 auto;
-        			background-color: #F6F6F6;
-				padding: 20px 40px;
-				border: solid 1px black;
-			        margin-top: 20px;
-				-webkit-border-radius: .5em;
-				-moz-border-radius: .5em;
-  				border-radius: 1em;
-				border-style: none;
-				border-width: thin;
-				border-color: #a8a8a8;
-				box-shadow: 2px 2px 2px #bbb;
-				-webkit-box-shadow: 2px 2px 2px #bbb;
-				-moz-box-shadow: 2px 2px 2px #bbb;
-			}
+
 		</style>
 
 
+		<div style="width:800px; margin: auto;">
 		<div id="title"><h1>ScenicGPS</h1></div>
+		
 
 		<div id="map">
 			<div style="padding: 1em; color: gray">Loading...</div>
 		</div>
 
+		<div id="display"></div>
+
+		</div>
 		<script type="text/javascript">
 			//< ![CDATA[
 		var data;
@@ -99,7 +88,11 @@
 		function createMarker(point,html) {
 			var marker = new GMarker(point);
 			GEvent.addListener(marker, "click", function() {
+
+				$('#display').html(html);
+				html = '<div style="width: 300px; height: 200px; overflow-y:scroll;">' + html + '</div>';
 				marker.openInfoWindowHtml(html);
+
 			});
 			return marker;
 		}
@@ -124,16 +117,17 @@
 				map.setCenter(new GLatLng(37.8715926,-122.2727470), 14);
 
 				for(x in geoHashes) {
-					var content;
+					var content = '';
 					var point;
-					content = '<div style="width: 300px; height: 200px; overflow-y:scroll;">';
 					$.each(geoHashes[x], function(i,y) {
 						point = new GLatLng( y.lat,y.lng);
 						content += displayContent(y) + "<br>";
 					});
-					content += '</div>';
+
 					var marker = createMarker(point,content);
 					map.addOverlay(marker); 
+
+
 				}
 			}		
 		}
