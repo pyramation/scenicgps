@@ -160,13 +160,26 @@
 		}		
 
 		function displayContent(obj) { 
-			var str = '<span class="annotationText">'+obj.title+'</span><br><a href="'+ obj.image + '" rel="shadowbox">';
+			var str = '<span class="annotationText">'+obj.title+'</span><br><a href="'+ obj.image + '" rel="shadowbox[Skateboarding];options={counterType:\'skip\',continuous:true,animSequence:\'sync\'}">';
 			var src = (getExtension(obj.image) ==='mov') ? "images/video.png"  : obj.icon;
 			str += '<img width="50px" height="50px" src="'+ src + '"></a>';
 			return str;
 		}
 
 
+
+		var lat;
+		var lng;
+
+		function onGeoLocError() {
+			lat = 37.8715926;
+			lng = -122.2727470;
+		}
+
+		function getUserPosition(pos) {
+			lat = pos.coords.latitude;
+			lng = pos.coords.longitude;
+		}
 
 
 
@@ -178,7 +191,16 @@
 				mMap = map;
 				map.addControl(new GLargeMapControl());
 				map.addControl(new GMapTypeControl());
+
+				if (navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(getUserPosition, onGeoLocError);
+				} else {
+					onGeoLocError();
+				}
+
 				map.setCenter(new GLatLng(37.8715926,-122.2727470), 14);
+				//map.setCenter(new GLatLng(lat, lng), 14);
+
 				GEvent.addListener(map, "zoomend", function() {
 					run();
 				});
