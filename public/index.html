@@ -6,8 +6,8 @@
 		<script src="javascript/jquery-1.5.2.min.js" type="text/javascript"></script>
 		<script src="javascript/gps.js" type="text/javascript"></script>
 		<script src="javascript/geohash.js" type="text/javascript"></script>
-		<link rel="stylesheet" type="text/css" href="css/coolblue.css">
 		<link rel="stylesheet" type="text/css" href="javascript/shadowbox-3.0.3/shadowbox.css">
+		<link rel="stylesheet" type="text/css" href="css/coolblue.css">
 		<script type="text/javascript" src="javascript/shadowbox-3.0.3/shadowbox.js"></script>
 		<script>
 				Shadowbox.init( { skipSetup:true }); Shadowbox.setup(); 
@@ -71,8 +71,8 @@
 		$.ajax({
 			url: '/scenic/getallphotos',
 			success: function(recv) {
-				//data = jQuery.parseJSON(recv);
-				//data = data['response'].photos;
+				data = jQuery.parseJSON(recv);
+				data = data['response'].photos;
 				createMap();
 				run();
 			}
@@ -133,10 +133,10 @@
 			$.each(data, function(i, c) {
 				var geoHash = getHash(c, level);
 				if (geoHashes[geoHash]) {
-					geoHashes[geoHash].push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash, trueheading:c.trueheading, magheading:c.magheading } );
+					geoHashes[geoHash].push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash, magheading:c.magheading, trueheading:c.trueheading } );
 				} else {
 					var gNewArray = new Array();
-					gNewArray.push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash, trueheading:c.trueheading, magheading:c.magheading } );
+					gNewArray.push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash, magheading:c.magheading, trueheading:c.trueheading } );
 					geoHashes[geoHash] = gNewArray;
 				}
 			});	
@@ -160,23 +160,14 @@
 		}		
 
 		function displayContent(obj) { 
-			var str = '<span class="annotationText">'+obj.title+'<br>'+obj.lat+'<br>'+obj.lng+'<br>'+obj.hash+'<br>'+obj.trueheading+'<br>'+obj.magheading+'</span><br><a href="'+ obj.image + '" rel="shadowbox">';
+			var str = '<span class="annotationText">'+obj.title+'</span><br><a href="'+ obj.image + '" rel="shadowbox">';
 			str += '<img width="50px" height="50px" src="'+ obj.icon + '"></a>';
 			return str;
 		}
 
-		var lat;
-		var lng;
 
-		function onGeoLocError() {
-			lat = 37.8715926;
-			lng = -122.2727470;
-		}
 
-		function getUserPosition(pos) {
-			lat = pos.coords.latitude;
-			lng = pos.coords.longitude;
-		}
+
 
 		function createMap() {
 
@@ -186,13 +177,7 @@
 				mMap = map;
 				map.addControl(new GLargeMapControl());
 				map.addControl(new GMapTypeControl());
-
-				if (navigator.geolocation) {
-					navigator.geolocation.getCurrentPosition(getUserPosition, onGeoLocError);
-				} else {
-					onGeoLocError();
-				}
-				map.setCenter(new GLatLng(lat, lng), 14);
+				map.setCenter(new GLatLng(37.8715926,-122.2727470), 14);
 				GEvent.addListener(map, "zoomend", function() {
 					run();
 				});
