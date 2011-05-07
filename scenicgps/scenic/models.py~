@@ -30,6 +30,7 @@ class GeoPt(models.Model):
     LNGKEY = 'lng'
     lat = models.FloatField()
     lng = models.FloatField()
+<<<<<<< HEAD
 
     def toDic(self):
         dic = {}
@@ -38,6 +39,8 @@ class GeoPt(models.Model):
         return dic
 
     
+=======
+>>>>>>> parent of ae20de5... icons and heading
     
     @classmethod
     def getor(cls,request):
@@ -92,10 +95,6 @@ class User(models.Model):
     DEVKEY = 'deviceid'
     device_id = models.CharField(max_length=40, unique = True)
 
-    def toDic(self):
-        return self.device_id
-
-    
     @classmethod
     def getor(cls,request):
         return getOrCreate(cls,device_id=getVal(request,cls.DEVKEY))
@@ -120,6 +119,7 @@ class RouteRating(models.Model):
 
 class ScenicContent(models.Model):
     TITLEKEY = 'title'
+<<<<<<< HEAD
     COORD_KEY = 'coord'
     DATE_KEY = 'date'
     POINT_KEY = 'point'
@@ -136,6 +136,10 @@ class ScenicContent(models.Model):
         dic[ScenicContent.COORD_KEY] = self.geopt.toDic()
         dic[ScenicContent.DATE_KEY] = str(self.date)
         return dic
+=======
+    title = models.CharField(max_length=200)
+    geopt = models.ForeignKey(GeoPt, related_name='%(app_label)s_%(class)s_related')
+>>>>>>> parent of ae20de5... icons and heading
 
     @classmethod
     def getor(cls,request):
@@ -190,17 +194,11 @@ class PanoramioContent(ScenicContent):
 
 class UserContent(ScenicContent):
     user = models.ForeignKey(User)
-    USER_KEY = 'user'
-    
+
     @classmethod
     def getor(cls, request):
         return  getOrCreate(cls, **cls.getkwargs(request))
 
-    def toDic(self):
-        dic = super(UserContent,self).toDic()
-        dic.update({UserContent.USER_KEY: self.user.toDic()})
-        return dic
-    
     @classmethod
     def getkwargs(cls, request):
         kw = cls.__bases__[0].getkwargs(request)
@@ -209,10 +207,9 @@ class UserContent(ScenicContent):
         return kw
 
 
-def get_image_path(instance, filename):
-    return os.path.join('photos',str(instance.id),filename)
 
 class UserPicture(UserContent):
+<<<<<<< HEAD
     picture = models.ImageField(upload_to=get_image_path,blank=False)
     icon = models.ImageField(upload_to=get_image_path, blank=False)
     magHeading = models.FloatField()
@@ -270,19 +267,33 @@ class UserPicture(UserContent):
         mh = getVal(request, 'magheading')
         point = geopt.toPoint()
         content = UserPicture(user = user, geopt = geopt, title = title, point = point, trueHeading = th, magHeading = mh)
+=======
+
+    @staticmethod
+    def get_image_path(instance, filename):
+        return os.path.join('photos',str(instance.id),filename)
+
+
+
+    picture = models.ImageField(upload_to=get_image_path,blank=False)
+    IMG_KEY = 'image'
+
+
+    @classmethod
+    def putPhoto(cls, request):
+        content = getOrCreate(cls, **UserContent.getkwargs(request))
+        image = cls.getImage(request)
+>>>>>>> parent of ae20de5... icons and heading
         content.save()
         image = cls.getImage(request)
         content.picture.save(image.name, image)
+<<<<<<< HEAD
         icon = cls.getIcon(request)
         content.icon.save(icon.name, icon)
         content.save()
+=======
+>>>>>>> parent of ae20de5... icons and heading
 
-    @classmethod
-    def getkwargs(cls, request):
-        kw = cls.__bases__[0].getkwargs(request)
-        kw['magHeading'] = getVal(request,cls.MAG_KEY)
-        kw['trueHeading'] = getVal(request,cls.TRUE_KEY)
-        return kw
 
     @classmethod
     def getImage(cls,request):
@@ -291,15 +302,6 @@ class UserPicture(UserContent):
             if form.is_valid():
                 image_file = request.FILES[cls.IMG_KEY]
                 return image_file
-
-    @classmethod
-    def getIcon(cls,request): 
-        if request.method == 'POST':
-            form = PhotoForm(request.POST, request.FILES)
-            if form.is_valid():
-                image_file = request.FILES[cls.ICON_KEY]
-                return image_file
-       
                 
 
 class UserComment(UserContent):

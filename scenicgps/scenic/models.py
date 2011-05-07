@@ -217,18 +217,19 @@ def get_image_path(instance, filename):
 
 class UserPicture(UserContent):
     picture = models.ImageField(upload_to=get_image_path,blank=False)
+<<<<<<< HEAD
     icon = models.ImageField(upload_to=get_image_path, blank=False)
     magHeading = models.FloatField()
     trueHeading = models.FloatField()
     
+=======
+>>>>>>> parent of ae20de5... icons and heading
     IMG_KEY = 'image'
-    ICON_KEY = 'icon'
     SET_KEY = 'photos'
-    TRUE_KEY = 'trueheading'
-    MAG_KEY = 'magheading'
 
     def toDic(self):
         dic = super(UserPicture, self).toDic()
+<<<<<<< HEAD
         dic.update({UserPicture.IMG_KEY:self.picURL(), UserPicture.ICON_KEY:self.iconURL(), UserPicture.MAG_KEY:self.magHeading, UserPicture.TRUE_KEY:self.trueHeading})
         return dic
 
@@ -245,6 +246,11 @@ class UserPicture(UserContent):
         except:
             return 'http://www.scenicgps.com/images/video.png'
 
+=======
+        dic.update({UserPicture.IMG_KEY:self.picURL()})
+        return dic
+
+>>>>>>> parent of ae20de5... icons and heading
     def picURL(self):
         return 'http://www.scenicgps.com' + self.picture.url
 
@@ -260,6 +266,7 @@ class UserPicture(UserContent):
 
     @classmethod
     def putPhoto(cls, request):
+<<<<<<< HEAD
         #content = getOrCreate(cls, **UserPicture.getkwargs(request))
         #content.magHeading = getVal(request, cls.MAG_KEY)
         #content.trueHeading = getVal(request, cls.TRUE_KEY)
@@ -273,19 +280,20 @@ class UserPicture(UserContent):
         mh = getVal(request, 'magheading')
         point = geopt.toPoint()
         content = UserPicture(user = user, geopt = geopt, title = title, point = point, trueHeading = th, magHeading = mh)
+=======
+        content = getOrCreate(cls, **UserContent.getkwargs(request))
+        image = cls.getImage(request)
+>>>>>>> parent of ae20de5... icons and heading
         content.save()
         image = cls.getImage(request)
         content.picture.save(image.name, image)
+<<<<<<< HEAD
         icon = cls.getIcon(request)
         content.icon.save(icon.name, icon)
         content.save()
+=======
+>>>>>>> parent of ae20de5... icons and heading
 
-    @classmethod
-    def getkwargs(cls, request):
-        kw = cls.__bases__[0].getkwargs(request)
-        kw['magHeading'] = getVal(request,cls.MAG_KEY)
-        kw['trueHeading'] = getVal(request,cls.TRUE_KEY)
-        return kw
 
     @classmethod
     def getImage(cls,request):
@@ -294,15 +302,6 @@ class UserPicture(UserContent):
             if form.is_valid():
                 image_file = request.FILES[cls.IMG_KEY]
                 return image_file
-
-    @classmethod
-    def getIcon(cls,request): 
-        if request.method == 'POST':
-            form = PhotoForm(request.POST, request.FILES)
-            if form.is_valid():
-                image_file = request.FILES[cls.ICON_KEY]
-                return image_file
-       
                 
 
 class UserComment(UserContent):
