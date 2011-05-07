@@ -201,14 +201,23 @@ def get_image_path(instance, filename):
 
 class UserPicture(UserContent):
     picture = models.ImageField(upload_to=get_image_path,blank=False)
+    icon = models.ImageField(upload_to=get_image_path, blank=False)
+    magHeading = models.FloatField()
+    trueHeading = models.FloatField()
     IMG_KEY = 'image'
+    ICON_KEY = 'icon'
     SET_KEY = 'photos'
+    TRUE_KEY = 'trueheading'
+    MAG_KEY = 'magheading'
 
 
     def toDic(self):
         dic = super(UserPicture, self).toDic()
-        dic.update({UserPicture.IMG_KEY:self.picURL()})
+        dic.update({UserPicture.IMG_KEY:self.picURL(), UserPicture.ICON_KEY:self.iconURL()})
         return dic
+
+    def iconURL(self):
+        return 'http://www.scenicgps.com' + self.icon.url
 
     def picURL(self):
         return 'http://www.scenicgps.com' + self.picture.url
@@ -225,11 +234,22 @@ class UserPicture(UserContent):
 
     @classmethod
     def putPhoto(cls, request):
-        content = getOrCreate(cls, **UserContent.getkwargs(request))
+        content = getOrCreate(cls, **UserPicture.getkwargs(request))
+        content.magHeading = getVal(request, cls.MAG_KEY)
+        content.trueHeading = getVal(request, cls.TRUE_KEY)
         image = cls.getImage(request)
+        icon = cls.getIcon(request)
         content.save()
         content.picture.save(image.name, image)
+        content.icon.save(icon.name, icon)
+        content.save()
 
+    @classmethod
+    def getkwargs(cls, request):
+        kw = cls.__bases__[0].getkwargs(request)
+        kw['magHeading'] = getVal(request,cls.MAG_KEY)
+        kw['trueHeading'] = getVal(request,cls.TRUE_KEY)
+        return kw
 
     @classmethod
     def getImage(cls,request):
@@ -238,6 +258,15 @@ class UserPicture(UserContent):
             if form.is_valid():
                 image_file = request.FILES[cls.IMG_KEY]
                 return image_file
+
+    @classmethod
+    def getIcon(cls,request): 
+        if request.method == 'POST':
+            form = PhotoForm(request.POST, request.FILES)
+            if form.is_valid():
+                image_file = request.FILES[cls.ICON_KEY]
+                return image_file
+       
                 
 
 class UserComment(UserContent):

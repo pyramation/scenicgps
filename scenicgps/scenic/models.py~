@@ -28,6 +28,12 @@ class GeoPt(models.Model):
     LNGKEY = 'lng'
     lat = models.FloatField()
     lng = models.FloatField()
+
+    def toDic(self):
+        dic = {}
+        dic[GeoPt.LATKEY] = self.lat
+        dic[GeoPt.LNGKEY] = self.lng
+        return dic
     
     @classmethod
     def getor(cls,request):
@@ -77,6 +83,10 @@ class User(models.Model):
     DEVKEY = 'deviceid'
     device_id = models.CharField(max_length=40, unique = True)
 
+    def toDic(self):
+        return self.device_id
+
+    
     @classmethod
     def getor(cls,request):
         return getOrCreate(cls,device_id=getVal(request,cls.DEVKEY))
@@ -101,8 +111,16 @@ class RouteRating(models.Model):
 
 class ScenicContent(models.Model):
     TITLEKEY = 'title'
+    COORD_KEY = 'coord'
     title = models.CharField(max_length=200)
     geopt = models.ForeignKey(GeoPt, related_name='%(app_label)s_%(class)s_related')
+
+
+    def toDic(self):
+        dic = {}
+        dic[ScenicContent.TITLEKEY] = self.title
+        dic[ScenicContent.COORD_KEY] = self.geopt.toDic()
+        return dic
 
     @classmethod
     def getor(cls,request):
@@ -157,7 +175,8 @@ class PanoramioContent(ScenicContent):
 
 class UserContent(ScenicContent):
     user = models.ForeignKey(User)
-
+    USER_KEY = 'user'
+    
     @classmethod
     def getor(cls, request):
         user = User.getor(request)
@@ -165,6 +184,11 @@ class UserContent(ScenicContent):
         content.user = user
         return content
 
+    def toDic(self):
+        dic = super(UserContent,self).toDic()
+        dic.update({UserContent.USER_KEY: self.user.toDic()})
+        return dic
+    
     @classmethod
     def getkwargs(cls, request):
         kw = cls.__bases__[0].getkwargs(request)
@@ -172,26 +196,60 @@ class UserContent(ScenicContent):
         return kw
 
 
+def get_image_path(instance, filename):
+    return os.path.join('photos',str(instance.id),filename)
 
 class UserPicture(UserContent):
-
-    @staticmethod
-    def get_image_path(instance, filename):
-        return os.path.join('photos',str(instance.id),filename)
-
-
-
     picture = models.ImageField(upload_to=get_image_path,blank=False)
+    icon = models.ImageField(upload_to=get_image_path, blank=False)
+    magHeading = models.FloatField()
+    trueHeading = models.FloatField()
     IMG_KEY = 'image'
+    ICON_KEY = 'icon'
+    SET_KEY = 'photos'
+    TRUE_KEY = 'trueheading'
+    MAG_KEY = 'magheading'
 
+
+    def toDic(self):
+        dic = super(UserPicture, self).toDic()
+        dic.update({UserPicture.IMG_KEY:self.picURL(), UserPicture.ICON_KEY:self.iconURL()})
+        return dic
+
+    def iconURL(self):
+        return 'http://www.scenicgps.com' + self.icon.url
+
+    def picURL(self):
+        return 'http://www.scenicgps.com' + self.picture.url
+
+    @classmethod
+    def fetchAllPictures(cls, request):
+        pics = cls.objects.all()
+        return [pic.toDic() for pic in pics]
+
+    @classmethod
+    def fetchPictures(cls, request):
+        pics = cls.objects.all()[:10]
+        return [pic.toDic() for pic in pics]
 
     @classmethod
     def putPhoto(cls, request):
         content = getOrCreate(cls, **UserContent.getkwargs(request))
+        content.magHeading = getVal(request, cls.MAG_KEY)
+        content.trueHeading = getVal(request, cls.TRUE_KEY)
         image = cls.getImage(request)
+        icon = cls.getIcon(request)
         content.save()
         content.picture.save(image.name, image)
+        content.icon.save(icon.name, icon)
+        content.save()
 
+    @classmethod
+    def getkwargs(cls, request):
+        kw = cls.__bases__[0].getkwargs(request)
+        kw['magHeading'] = getVal(request,cls.MAG_KEY)
+        kw['trueHeading'] = getVal(request,cls.TRUE_KEY)
+        return kw
 
     @classmethod
     def getImage(cls,request):
@@ -200,6 +258,15 @@ class UserPicture(UserContent):
             if form.is_valid():
                 image_file = request.FILES[cls.IMG_KEY]
                 return image_file
+
+    @classmethod
+    def getIcon(cls,request): 
+        if request.method == 'POST':
+            form = PhotoForm(request.POST, request.FILES)
+            if form.is_valid():
+                image_file = request.FILES[cls.ICON_KEY]
+                return image_file
+       
                 
 
 class UserComment(UserContent):

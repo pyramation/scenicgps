@@ -128,10 +128,10 @@
 			$.each(data, function(i, c) {
 				var geoHash = getHash(c, level);
 				if (geoHashes[geoHash]) {
-					geoHashes[geoHash].push( {title:c.title, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash } );
+					geoHashes[geoHash].push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash } );
 				} else {
 					var gNewArray = new Array();
-					gNewArray.push( {title:c.title, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash } );
+					gNewArray.push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash } );
 					geoHashes[geoHash] = gNewArray;
 				}
 			});	
@@ -156,7 +156,7 @@
 
 		function displayContent(obj) { 
 			var str = '<span class="annotationText">'+obj.title+'</span><br><a href="'+ obj.image + '" target="blank">';
-			var src = (getExtension(obj.image) ==='mov') ? "images/video.png"  : obj.image;
+			var src = (getExtension(obj.image) ==='mov') ? "images/video.png"  : obj.icon;
 			str += '<img width="50px" height="50px" src="'+ src + '"></a>';
 			return str;
 		}
@@ -193,7 +193,7 @@
 					$.each(geoHashes[x], function(i,y) {
 						point = new GLatLng( y.lat,y.lng);
 						content += displayContent(y) + "<br>";
-						imagesrc = (getExtension(y.image) ==='mov') ? "images/video.png"  : y.image;
+						imagesrc = (getExtension(y.image) ==='mov') ? "images/video.png"  : y.icon;
 					});
 
   					var icon = new GIcon(); 
