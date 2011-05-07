@@ -6,8 +6,8 @@
 		<script src="javascript/jquery-1.5.2.min.js" type="text/javascript"></script>
 		<script src="javascript/gps.js" type="text/javascript"></script>
 		<script src="javascript/geohash.js" type="text/javascript"></script>
-		<link rel="stylesheet" type="text/css" href="javascript/shadowbox-3.0.3/shadowbox.css">
 		<link rel="stylesheet" type="text/css" href="css/coolblue.css">
+		<link rel="stylesheet" type="text/css" href="javascript/shadowbox-3.0.3/shadowbox.css">
 		<script type="text/javascript" src="javascript/shadowbox-3.0.3/shadowbox.js"></script>
 		<script>
 				Shadowbox.init( { skipSetup:true }); Shadowbox.setup(); 
@@ -133,10 +133,10 @@
 			$.each(data, function(i, c) {
 				var geoHash = getHash(c, level);
 				if (geoHashes[geoHash]) {
-					geoHashes[geoHash].push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash, magheading:c.magheading, trueheading:c.trueheading } );
+					geoHashes[geoHash].push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash } );
 				} else {
 					var gNewArray = new Array();
-					gNewArray.push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash, magheading:c.magheading, trueheading:c.trueheading } );
+					gNewArray.push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash } );
 					geoHashes[geoHash] = gNewArray;
 				}
 			});	
@@ -146,17 +146,10 @@
 			var marker = new GMarker(point, {icon: icon});
 			GEvent.addListener(marker, "click", function() {
 
-			/*	$('#display').html(html);
+				$('#display').html(html);
 				Shadowbox.setup();
 				html = '<div style="width: 300px; height: 200px; overflow-y:scroll;">' + html + '</div>';
 				marker.openInfoWindowHtml(html, {onOpenFn: function() { Shadowbox.setup();}});
-*/
-				    Shadowbox.open({
-        				content:    html,
-        				player:     "html",
-        				title:      "Welcome"
-    				});
-
 			});
 
 			return marker;
@@ -166,23 +159,10 @@
     			return filename.split('.').pop().toLowerCase();
 		}		
 
-		function displayContentWithData(obj) { 
-			var str = '<span class="annotationText"><table><tr><td><img width="50px" height="50px" src="'+ obj.icon + '"></a></td><td>'+obj.title+'</td><td>Coordinates: ('+obj.lat+','+obj.lng+')</td><td>True Heading: '+obj.trueheading+'</td><td>Magnetic Heading:'+obj.magheading+'</td><td>GeoHash:'+obj.hash+'</td></tr></table></span><br><a href="'+ obj.image + '" rel="shadowbox[Skateboarding];options={counterType:\'skip\',continuous:true,animSequence:\'sync\'}">';
-
-			return str;
-		}
 		function displayContent(obj) { 
-			//var str = '<span class="annotationText">'+obj.title+'</span><br><a href="'+ obj.image + '" rel="shadowbox">';
-			var str = '<span class="annotationText"><table><tr><td>'+obj.title+'</td></tr><tr><td>Coordinates: ('+obj.lat+','+obj.lng+')</td></tr><tr><td>True Heading: '+obj.trueheading+'</td></tr><tr><td>Magnetic Heading:'+obj.magheading+'</td></tr><tr><td>GeoHash:'+obj.hash+'</td></tr></table></span><br><a href="'+ obj.image + '" rel="shadowbox[Skateboarding];options={counterType:\'skip\',continuous:true,animSequence:\'sync\'}">';
-
-			str += '<img width="50px" height="50px" src="'+ obj.icon + '"></a>';
-			return str;
-		}
-		function displayContent(obj) { 
-			//var str = '<span class="annotationText">'+obj.title+'</span><br><a href="'+ obj.image + '" rel="shadowbox">';
-			var str = '<span class="annotationText"><table><tr><td>'+obj.title+'</td></tr><tr><td>Coordinates: ('+obj.lat+','+obj.lng+')</td></tr><tr><td>True Heading: '+obj.trueheading+'</td></tr><tr><td>Magnetic Heading:'+obj.magheading+'</td></tr><tr><td>GeoHash:'+obj.hash+'</td></tr></table></span><br><a href="'+ obj.image + '" rel="shadowbox[Skateboarding];options={counterType:\'skip\',continuous:true,animSequence:\'sync\'}">';
-
-			str += '<img width="50px" height="50px" src="'+ obj.icon + '"></a>';
+			var str = '<span class="annotationText">'+obj.title+'</span><br><a href="'+ obj.image + '" rel="shadowbox">';
+			var src = (getExtension(obj.image) ==='mov') ? "images/video.png"  : obj.icon;
+			str += '<img width="50px" height="50px" src="'+ src + '"></a>';
 			return str;
 		}
 

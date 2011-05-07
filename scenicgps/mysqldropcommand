@@ -1,0 +1,1 @@
+drop table scenic_contentrating, scenic_geopt, scenic_panoramiocontent, scenic_route, scenic_routerating, scenic_sceniccontent, scenic_user, scenic_usercomment, scenic_usercontent, scenic_userpicture, south_migrationhistory;

@@ -28,3 +28,15 @@ def ratePanoramio(request):
 @getMethod
 def lastRoute(request):
 	return {Route.PLKEY : Route.lastRoute().plString}
+
+@getMethod
+def userPhotos(request):
+	return {UserPicture.SET_KEY : UserPicture.fetchPictures(request)}
+
+@getMethod
+def allUserPhotos(request):
+	return {UserPicture.SET_KEY : UserPicture.fetchAllPictures(request)}
+
+#@getMethod
+def nearby(request):
+	return {UserPicture.SET_KEY : [x.toDic() for x in UserPicture.nearby(request)]}

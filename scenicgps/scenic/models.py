@@ -2,7 +2,7 @@
 from django.db import models
 import os
 from django.forms import Form as PhotoForm
-
+from geohash import Geohash
 def getOrCreate(cls, **kwargs):
     return cls.objects.get_or_create(**kwargs)[0]
 
@@ -26,8 +26,13 @@ def getRating(request):
 class GeoPt(models.Model):
     LATKEY = 'lat'
     LNGKEY = 'lng'
+    HASH_KEY = 'hash'
     lat = models.FloatField()
     lng = models.FloatField()
+    geohash = models.CharField(max_length = 50)
+    
+    def geoHash(self):
+        return str(Geohash((self.lat, self.lng)))
 
     def toDic(self):
         dic = {}
@@ -37,7 +42,10 @@ class GeoPt(models.Model):
     
     @classmethod
     def getor(cls,request):
-        return getOrCreate(cls,lat=cls.getLat(request),lng=cls.getLng(request))
+        pt =  getOrCreate(cls,lat=cls.getLat(request),lng=cls.getLng(request))
+        pt.geohash = pt.geoHash()
+        pt.save()
+        return pt
 
     @classmethod
     def getLat(cls,request):
@@ -226,6 +234,17 @@ class UserPicture(UserContent):
     def fetchAllPictures(cls, request):
         pics = cls.objects.all()
         return [pic.toDic() for pic in pics]
+
+    @classmethod
+    def nearby(cls, request):
+        n = getVal(request,'npics')
+        checkhash = getVal(request,'geohash')
+        pics = cls.objects.filter(geopt__geohash__contains=checkhash)
+        try:
+            return pics[:n]
+        except:
+            return pics
+        
 
     @classmethod
     def fetchPictures(cls, request):
