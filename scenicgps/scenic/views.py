@@ -2,7 +2,7 @@
 from scenicgps.scenic.models import *
 from scenicgps.utils import *
 from django.views.decorators.csrf import csrf_exempt
-
+from django.http import HttpResponse
 
 
 @postMethod
@@ -16,6 +16,7 @@ def index(request):
 def uploadPhoto(request):
 	if request.method == 'POST':
 		UserPicture.putPhoto(request)
+		
 
 @postMethod
 def putRoute(request):

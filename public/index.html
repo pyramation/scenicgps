@@ -71,8 +71,8 @@
 		$.ajax({
 			url: '/scenic/getallphotos',
 			success: function(recv) {
-				//data = jQuery.parseJSON(recv);
-				//data = data['response'].photos;
+				data = jQuery.parseJSON(recv);
+				data = data['response'].photos;
 				createMap();
 				run();
 			}

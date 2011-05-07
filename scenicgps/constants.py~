@@ -1,0 +1,11 @@
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.                                                 
+        'NAME': 'scenicgps_db',                      # Or path to database file if using sqlite3.                                                       
+        'USER': 'scenicgps',                      # Not used with sqlite3.                                                                                       
+        'PASSWORD': 'gpsproject',                  # Not used with sqlite3.                                                                                       
+        'HOST': 'mysql.scenicgps.com',                      # Set to empty string for localhost. Not used with sqlite3.                                                    
+        'PORT': '3306',                      # Set to empty string for default. Not used with sqlite3.                                                      
+    }
+}
+MEDIA_ROOT='/home/scenicgps/scenicgps.com/public/media/'

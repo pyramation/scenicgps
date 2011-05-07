@@ -2,7 +2,7 @@
 from scenicgps.scenic.models import *
 from scenicgps.utils import *
 from django.views.decorators.csrf import csrf_exempt
-
+from django.http import HttpResponse
 
 
 @postMethod
@@ -12,10 +12,11 @@ def index(request):
 
 
 @csrf_exempt
-@postMethod
+#@postMethod
 def uploadPhoto(request):
-	if request.method == 'POST':
+#	if request.method == 'POST':
 		UserPicture.putPhoto(request)
+		
 
 @postMethod
 def putRoute(request):
@@ -28,3 +29,11 @@ def ratePanoramio(request):
 @getMethod
 def lastRoute(request):
 	return {Route.PLKEY : Route.lastRoute().plString}
+
+@getMethod
+def userPhotos(request):
+	return {UserPicture.SET_KEY : UserPicture.fetchPictures(request)}
+
+@getMethod
+def allUserPhotos(request):
+	return {UserPicture.SET_KEY : UserPicture.fetchAllPictures(request)}

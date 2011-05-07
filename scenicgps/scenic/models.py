@@ -1,7 +1,10 @@
-#from django.contrib.gis.db import models
-from django.db import models
+from django.contrib.gis.db import models
+#from django.db import models
 import os
 from django.forms import Form as PhotoForm
+from django.contrib.gis.measure import D
+from django.contrib.gis.geos import Point
+
 
 def getOrCreate(cls, **kwargs):
     return cls.objects.get_or_create(**kwargs)[0]
@@ -12,7 +15,6 @@ def getVal(request,key):
         if isinstance(result,str) or isinstance(result,unicode):
             return result
         result =  result[0]
-        asdfasd
     except:
         return None
 
@@ -34,10 +36,17 @@ class GeoPt(models.Model):
         dic[GeoPt.LATKEY] = self.lat
         dic[GeoPt.LNGKEY] = self.lng
         return dic
+
+    
     
     @classmethod
     def getor(cls,request):
-        return getOrCreate(cls,lat=cls.getLat(request),lng=cls.getLng(request))
+        lat = cls.getLat(request)
+        lng = cls.getLng(request)
+        return getOrCreate(cls,lat=lat, lng = lng)
+
+    def toPoint(self):
+        return Point(self.lat,self.lng)
 
     @classmethod
     def getLat(cls,request):
@@ -112,19 +121,24 @@ class RouteRating(models.Model):
 class ScenicContent(models.Model):
     TITLEKEY = 'title'
     COORD_KEY = 'coord'
+    DATE_KEY = 'date'
+    POINT_KEY = 'point'
+    
     title = models.CharField(max_length=200)
     geopt = models.ForeignKey(GeoPt, related_name='%(app_label)s_%(class)s_related')
-
-
+    date = models.DateTimeField(auto_now=True)
+    point = models.PointField()
+    objects = models.GeoManager()
+    
     def toDic(self):
         dic = {}
         dic[ScenicContent.TITLEKEY] = self.title
         dic[ScenicContent.COORD_KEY] = self.geopt.toDic()
+        dic[ScenicContent.DATE_KEY] = str(self.date)
         return dic
 
     @classmethod
     def getor(cls,request):
-        
         content = getOrCreate(cls, **cls.getkwargs(request))
         return content
 
@@ -132,7 +146,8 @@ class ScenicContent(models.Model):
     def getkwargs(cls,request):
         title = getVal(request,cls.TITLEKEY)
         geopt = GeoPt.getor(request)
-        return {'title':title,'geopt':geopt}
+        point = geopt.toPoint()
+        return {'title':title,'geopt':geopt, 'point': point}
         
 
     def rate(self, request):
@@ -179,9 +194,10 @@ class UserContent(ScenicContent):
     
     @classmethod
     def getor(cls, request):
-        user = User.getor(request)
-        content = getOrCreate(cls, **ScenicContent.getkwargs(request))
-        content.user = user
+        kws = cls.getkwargs(request)
+        print kws['point']
+        content = getOrCreate(cls, **kws)
+        print content
         return content
 
     def toDic(self):
@@ -204,43 +220,63 @@ class UserPicture(UserContent):
     icon = models.ImageField(upload_to=get_image_path, blank=False)
     magHeading = models.FloatField()
     trueHeading = models.FloatField()
+    
     IMG_KEY = 'image'
     ICON_KEY = 'icon'
     SET_KEY = 'photos'
     TRUE_KEY = 'trueheading'
     MAG_KEY = 'magheading'
 
-
     def toDic(self):
         dic = super(UserPicture, self).toDic()
-        dic.update({UserPicture.IMG_KEY:self.picURL(), UserPicture.ICON_KEY:self.iconURL()})
+        dic.update({UserPicture.IMG_KEY:self.picURL(), UserPicture.ICON_KEY:self.iconURL(), UserPicture.MAG_KEY:self.magHeading, UserPicture.TRUE_KEY:self.trueHeading})
         return dic
 
+    @classmethod
+    def around(cls, request):
+        n = int(getVal(request, 'npics'))
+        km = float(getVal(request, 'km'))
+        point = GeoPt.getPoint(request)
+        return cls.objects.filter(point__distance_lte=(point,D(km))).order_by('-date')[:n]
+
     def iconURL(self):
-        return 'http://www.scenicgps.com' + self.icon.url
+        try:
+            return 'http://www.scenicgps.com' + self.icon.url
+        except:
+            return 'http://www.scenicgps.com/images/video.png'
 
     def picURL(self):
         return 'http://www.scenicgps.com' + self.picture.url
 
     @classmethod
     def fetchAllPictures(cls, request):
-        pics = cls.objects.all()
+        pics = cls.objects.order_by('-date')
         return [pic.toDic() for pic in pics]
 
     @classmethod
     def fetchPictures(cls, request):
-        pics = cls.objects.all()[:10]
+        pics = cls.objects.order_by('-date')[:10]
         return [pic.toDic() for pic in pics]
 
     @classmethod
     def putPhoto(cls, request):
-        content = getOrCreate(cls, **UserPicture.getkwargs(request))
-        content.magHeading = getVal(request, cls.MAG_KEY)
-        content.trueHeading = getVal(request, cls.TRUE_KEY)
-        image = cls.getImage(request)
-        icon = cls.getIcon(request)
+        #content = getOrCreate(cls, **UserPicture.getkwargs(request))
+        #content.magHeading = getVal(request, cls.MAG_KEY)
+        #content.trueHeading = getVal(request, cls.TRUE_KEY)
+        #content.save()
+        user = User.getor(request)
+        user.save()
+        geopt = GeoPt.getor(request)
+        geopt.save()
+        title = getVal(request, 'title')
+        th = getVal(request, 'trueheading')
+        mh = getVal(request, 'magheading')
+        point = geopt.toPoint()
+        content = UserPicture(user = user, geopt = geopt, title = title, point = point, trueHeading = th, magHeading = mh)
         content.save()
+        image = cls.getImage(request)
         content.picture.save(image.name, image)
+        icon = cls.getIcon(request)
         content.icon.save(icon.name, icon)
         content.save()
 
