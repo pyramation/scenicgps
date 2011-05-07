@@ -213,7 +213,7 @@ class UserPicture(UserContent):
 
     def toDic(self):
         dic = super(UserPicture, self).toDic()
-        dic.update({UserPicture.IMG_KEY:self.picURL(), UserPicture.ICON_KEY:self.iconURL()})
+        dic.update({UserPicture.IMG_KEY:self.picURL(), UserPicture.ICON_KEY:self.iconURL(),UserPicture.MAG_KEY:self.magHeading, UserPicture.TRUE_KEY:self.trueHeading})
         return dic
 
     def iconURL(self):

@@ -234,7 +234,7 @@ class UserPicture(UserContent):
 
     @classmethod
     def putPhoto(cls, request):
-        content = getOrCreate(cls, **UserContent.getkwargs(request))
+        content = getOrCreate(cls, **UserPicture.getkwargs(request))
         content.magHeading = getVal(request, cls.MAG_KEY)
         content.trueHeading = getVal(request, cls.TRUE_KEY)
         image = cls.getImage(request)
