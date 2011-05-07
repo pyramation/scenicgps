@@ -71,8 +71,8 @@
 		$.ajax({
 			url: '/scenic/getallphotos',
 			success: function(recv) {
-				data = jQuery.parseJSON(recv);
-				data = data['response'].photos;
+				//data = jQuery.parseJSON(recv);
+				//data = data['response'].photos;
 				createMap();
 				run();
 			}
@@ -133,10 +133,10 @@
 			$.each(data, function(i, c) {
 				var geoHash = getHash(c, level);
 				if (geoHashes[geoHash]) {
-					geoHashes[geoHash].push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash } );
+					geoHashes[geoHash].push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash, trueheading:c.trueheading, magheading:c.magheading } );
 				} else {
 					var gNewArray = new Array();
-					gNewArray.push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash } );
+					gNewArray.push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash, trueheading:c.trueheading, magheading:c.magheading } );
 					geoHashes[geoHash] = gNewArray;
 				}
 			});	
@@ -160,15 +160,23 @@
 		}		
 
 		function displayContent(obj) { 
-			var str = '<span class="annotationText">'+obj.title+'</span><br><a href="'+ obj.image + '" rel="shadowbox">';
-			var src = (getExtension(obj.image) ==='mov') ? "images/video.png"  : obj.icon;
-			str += '<img width="50px" height="50px" src="'+ src + '"></a>';
+			var str = '<span class="annotationText">'+obj.title+'<br>'+obj.lat+'<br>'+obj.lng+'<br>'+obj.hash+'<br>'+obj.trueheading+'<br>'+obj.magheading+'</span><br><a href="'+ obj.image + '" rel="shadowbox">';
+			str += '<img width="50px" height="50px" src="'+ obj.icon + '"></a>';
 			return str;
 		}
 
+		var lat;
+		var lng;
 
+		function onGeoLocError() {
+			lat = 37.8715926;
+			lng = -122.2727470;
+		}
 
-
+		function getUserPosition(pos) {
+			lat = pos.coords.latitude;
+			lng = pos.coords.longitude;
+		}
 
 		function createMap() {
 
@@ -178,7 +186,13 @@
 				mMap = map;
 				map.addControl(new GLargeMapControl());
 				map.addControl(new GMapTypeControl());
-				map.setCenter(new GLatLng(37.8715926,-122.2727470), 14);
+
+				if (navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(getUserPosition, onGeoLocError);
+				} else {
+					onGeoLocError();
+				}
+				map.setCenter(new GLatLng(lat, lng), 14);
 				GEvent.addListener(map, "zoomend", function() {
 					run();
 				});
