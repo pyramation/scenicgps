@@ -160,23 +160,12 @@
 		}		
 
 		function displayContent(obj) { 
-<<<<<<< HEAD
 			var str = '<span class="annotationText">'+obj.title+', heading'+obj.trueheading+'</span>';
 			str += '<br>';
 			str += '<a href="'+ obj.image + '" rel="shadowbox[Skateboarding];options={counterType:\'skip\',continuous:true,animSequence:\'sync\'}">';
 			var src = (getExtension(obj.image) ==='mov') ? "images/video.png"  : obj.icon;
 			str += '<img width="50px" height="50px" src="'+ src + '"></a>';
 			str += '<img width="50px" height="50px" src="images/compass.png" style="-webkit-transform: rotate('+obj.trueheading+'deg); -moz-transform: rotate('+obj.trueheading+'deg);">';
-=======
-<<<<<<< HEAD
-			var str = '<span class="annotationText">'+obj.title+'<br>'+obj.lat+'<br>'+obj.lng+'<br>'+obj.hash+'<br>'+obj.trueheading+'<br>'+obj.magheading+'</span><br><a href="'+ obj.image + '" rel="shadowbox">';
-			str += '<img width="50px" height="50px" src="'+ obj.icon + '"></a>';
-=======
-			var str = '<span class="annotationText">'+obj.title+'</span><br><a href="'+ obj.image + '" target="blank">';
-			var src = (getExtension(obj.image) ==='mov') ? "images/video.png"  : obj.image;
-			str += '<img width="50px" height="50px" src="'+ src + '"></a>';
->>>>>>> parent of ae20de5... icons and heading
->>>>>>> master
 			return str;
 		}
 
