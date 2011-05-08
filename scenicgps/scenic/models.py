@@ -1,4 +1,3 @@
-#from django.contrib.gis.db import models
 from django.db import models
 import os
 from django.forms import Form as PhotoForm
@@ -122,7 +121,7 @@ class ScenicContent(models.Model):
     COORD_KEY = 'coord'
     title = models.CharField(max_length=200)
     geopt = models.ForeignKey(GeoPt, related_name='%(app_label)s_%(class)s_related')
-
+    date = models.DateTimeField(auto_now = True)
 
     def toDic(self):
         dic = {}
@@ -225,7 +224,10 @@ class UserPicture(UserContent):
         return dic
 
     def iconURL(self):
-        return 'http://www.scenicgps.com' + self.icon.url
+        try:
+            return 'http://www.scenicgps.com' + self.icon.url
+        except:
+            return 'http://www.scenicgps.com/images/video.png'
 
     def picURL(self):
         return 'http://www.scenicgps.com' + self.picture.url
@@ -254,9 +256,7 @@ class UserPicture(UserContent):
 
     @classmethod
     def putPhoto(cls, request):
-        content = getOrCreate(cls, **UserPicture.getkwargs(request))
-        content.magHeading = getVal(request, cls.MAG_KEY)
-        content.trueHeading = getVal(request, cls.TRUE_KEY)
+        content = getOrCreate(cls, **cls.getkwargs(request))
         image = cls.getImage(request)
         icon = cls.getIcon(request)
         content.save()
@@ -267,8 +267,8 @@ class UserPicture(UserContent):
     @classmethod
     def getkwargs(cls, request):
         kw = cls.__bases__[0].getkwargs(request)
-        kw['magHeading'] = getVal(request,cls.MAG_KEY)
-        kw['trueHeading'] = getVal(request,cls.TRUE_KEY)
+        kw['magHeading'] = float(getVal(request,cls.MAG_KEY))
+        kw['trueHeading'] = float(getVal(request,cls.TRUE_KEY))
         return kw
 
     @classmethod
