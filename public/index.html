@@ -133,17 +133,10 @@
 			$.each(data, function(i, c) {
 				var geoHash = getHash(c, level);
 				if (geoHashes[geoHash]) {
-<<<<<<< HEAD
-					geoHashes[geoHash].push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash, trueheading:c.trueheading, magheading:c.magheading } );
+					geoHashes[geoHash].push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash, magheading:c.magheading, trueheading:c.trueheading } );
 				} else {
 					var gNewArray = new Array();
-					gNewArray.push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash, trueheading:c.trueheading, magheading:c.magheading } );
-=======
-					geoHashes[geoHash].push( {title:c.title, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash } );
-				} else {
-					var gNewArray = new Array();
-					gNewArray.push( {title:c.title, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash } );
->>>>>>> parent of ae20de5... icons and heading
+					gNewArray.push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash, magheading:c.magheading, trueheading:c.trueheading} );
 					geoHashes[geoHash] = gNewArray;
 				}
 			});	
@@ -167,29 +160,41 @@
 		}		
 
 		function displayContent(obj) { 
-<<<<<<< HEAD
-			var str = '<span class="annotationText">'+obj.title+'<br>'+obj.lat+'<br>'+obj.lng+'<br>'+obj.hash+'<br>'+obj.trueheading+'<br>'+obj.magheading+'</span><br><a href="'+ obj.image + '" rel="shadowbox">';
-			str += '<img width="50px" height="50px" src="'+ obj.icon + '"></a>';
-=======
-			var str = '<span class="annotationText">'+obj.title+'</span><br><a href="'+ obj.image + '" target="blank">';
-			var src = (getExtension(obj.image) ==='mov') ? "images/video.png"  : obj.image;
+			var str = obj.title;
+			str += '<a href="'+ obj.image + '" rel="shadowbox[Skateboarding];options={counterType:\'skip\',continuous:true,animSequence:\'sync\'}">';
+			var src = (getExtension(obj.image) ==='mov') ? "images/video.png"  : obj.icon;
 			str += '<img width="50px" height="50px" src="'+ src + '"></a>';
->>>>>>> parent of ae20de5... icons and heading
+			str += '<img width="50px" height="50px" src="images/compass.png" style="-webkit-transform: rotate('+obj.trueheading+'deg); -moz-transform: rotate('+obj.trueheading+'deg);">';
+			str += '<hr>';
 			return str;
 		}
 
-		var lat;
-		var lng;
+
+
+		var _lat;
+		var _lng;
 
 		function onGeoLocError() {
-			lat = 37.8715926;
-			lng = -122.2727470;
+			_lat = 37.8715926;
+			_lng = -122.2727470;
+			setupMap();
 		}
 
 		function getUserPosition(pos) {
-			lat = pos.coords.latitude;
-			lng = pos.coords.longitude;
+			_lat = pos.coords.latitude;
+			_lng = pos.coords.longitude;
+			setupMap();
 		}
+
+		function setupMap() {
+				//mMap.setCenter(new GLatLng(37.8715926,-122.2727470), 14);
+				mMap.setCenter(new GLatLng(_lat, _lng), 14);
+				GEvent.addListener(mMap, "zoomend", function() {
+					run();
+				});
+
+		}
+
 
 		function createMap() {
 
@@ -205,10 +210,6 @@
 				} else {
 					onGeoLocError();
 				}
-				map.setCenter(new GLatLng(lat, lng), 14);
-				GEvent.addListener(map, "zoomend", function() {
-					run();
-				});
 
 			}		
 		}
@@ -224,7 +225,7 @@
 					var imagesrc = '';
 					$.each(geoHashes[x], function(i,y) {
 						point = new GLatLng( y.lat,y.lng);
-						content += displayContent(y) + "<br>";
+						content += displayContent(y);
 						imagesrc = (getExtension(y.image) ==='mov') ? "images/video.png"  : y.image;
 					});
 
