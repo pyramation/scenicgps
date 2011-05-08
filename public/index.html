@@ -146,7 +146,7 @@
 			var marker = new GMarker(point, {icon: icon});
 			GEvent.addListener(marker, "click", function() {
 
-				$('#display').html(html);
+				$('#display').html('<br><h2>Content</h2>'+html);
 				Shadowbox.setup();
 				html = '<div style="width: 300px; height: 200px; overflow-y:scroll;">' + html + '</div>';
 				marker.openInfoWindowHtml(html, {onOpenFn: function() { Shadowbox.setup();}});
@@ -160,12 +160,8 @@
 		}		
 
 		function displayContent(obj) { 
-<<<<<<< HEAD
 			var str = '<span class="annotationText">'+obj.title+'</span>';
 			str += '<a href="'+ obj.image + '" rel="shadowbox[Skateboarding];options={counterType:\'skip\',continuous:true,animSequence:\'sync\'}">';
-=======
-			var str = '<a href="'+ obj.image + '" rel="shadowbox[Skateboarding];options={counterType:\'skip\',continuous:true,animSequence:\'sync\'}">';
->>>>>>> temp1
 			var src = (getExtension(obj.image) ==='mov') ? "images/video.png"  : obj.icon;
 			str += '<img width="50px" height="50px" src="'+ src + '"></a>';
 			str += '<img width="50px" height="50px" src="images/compass.png" style="-webkit-transform: rotate('+obj.trueheading+'deg); -moz-transform: rotate('+obj.trueheading+'deg);">';
@@ -191,7 +187,6 @@
 		}
 
 		function setupMap() {
-				//mMap.setCenter(new GLatLng(37.8715926,-122.2727470), 14);
 				mMap.setCenter(new GLatLng(_lat, _lng), 14);
 				GEvent.addListener(mMap, "zoomend", function() {
 					run();
@@ -214,6 +209,7 @@
 				} else {
 					onGeoLocError();
 				}
+				mMap.setCenter(new GLatLng(37.8715926,-122.2727470), 14);
 
 			}		
 		}
