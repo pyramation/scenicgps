@@ -11,10 +11,20 @@ def testUser():
     r = HttpRequest()
     r.GET = {'deviceid':'asdfasdfasdfasd', 'device_id':'asdfasd', 'lat':'32','lng':'33','title':'tei', 'trueheading':'23', 'magheading': '42'}
     u = User.getor(r)
+<<<<<<< HEAD
     g = GeoPt.getor(r)
     th = getVal(r, 'trueheading')
     mh = getVal(r, 'magheading')
     return UserPicture(user=u, geopt = g, title = 'asdfasdfasdfa', trueHeading =th, magHeading = mh )
+=======
+    u.save()
+    g = GeoPt.getor(r)
+    g.save()
+    point = g.toPoint()
+    th = getVal(r, 'trueheading')
+    mh = getVal(r, 'magheading')
+    return UserPicture(user=u, geopt = g, title = 'asdfasdfasdfa',point = point, trueHeading =th, magHeading = mh )
+>>>>>>> master
     
 def aTest():
     r = HttpRequest()

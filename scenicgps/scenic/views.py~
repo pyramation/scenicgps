@@ -2,7 +2,7 @@
 from scenicgps.scenic.models import *
 from scenicgps.utils import *
 from django.views.decorators.csrf import csrf_exempt
-
+from django.http import HttpResponse
 
 
 @postMethod
@@ -12,10 +12,11 @@ def index(request):
 
 
 @csrf_exempt
-@postMethod
+#@postMethod
 def uploadPhoto(request):
-	if request.method == 'POST':
+#	if request.method == 'POST':
 		UserPicture.putPhoto(request)
+		
 
 @postMethod
 def putRoute(request):
@@ -36,7 +37,10 @@ def userPhotos(request):
 @getMethod
 def allUserPhotos(request):
 	return {UserPicture.SET_KEY : UserPicture.fetchAllPictures(request)}
+<<<<<<< HEAD
 
 #@getMethod
 def nearby(request):
 	return {UserPicture.SET_KEY : [x.toDic() for x in UserPicture.nearby(request)]}
+=======
+>>>>>>> master

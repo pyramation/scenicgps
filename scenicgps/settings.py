@@ -74,6 +74,8 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
+#GEOS_LIBRARY_PATH = ''
+
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -83,8 +85,12 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
+<<<<<<< HEAD
 #    'django.contrib.gis',
     'south',
+=======
+    'django.contrib.gis',
+>>>>>>> master
     'scenic',
 )
 
