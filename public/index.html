@@ -133,10 +133,10 @@
 			$.each(data, function(i, c) {
 				var geoHash = getHash(c, level);
 				if (geoHashes[geoHash]) {
-					geoHashes[geoHash].push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash } );
+					geoHashes[geoHash].push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash, magheading:c.magheading, trueheading:c.trueheading } );
 				} else {
 					var gNewArray = new Array();
-					gNewArray.push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash } );
+					gNewArray.push( {title:c.title, icon:c.icon, image:c.image, lat:c.coord.lat, lng:c.coord.lng, hash:geoHash, magheading:c.magheading, trueheading:c.trueheading} );
 					geoHashes[geoHash] = gNewArray;
 				}
 			});	
@@ -160,7 +160,7 @@
 		}		
 
 		function displayContent(obj) { 
-			var str = '<span class="annotationText">'+obj.title+'</span><br><a href="'+ obj.image + '" rel="shadowbox[Skateboarding];options={counterType:\'skip\',continuous:true,animSequence:\'sync\'}">';
+			var str = '<span class="annotationText">'+obj.title+', heading'+obj.trueheading+'</span><br><a href="'+ obj.image + '" rel="shadowbox[Skateboarding];options={counterType:\'skip\',continuous:true,animSequence:\'sync\'}">';
 			var src = (getExtension(obj.image) ==='mov') ? "images/video.png"  : obj.icon;
 			str += '<img width="50px" height="50px" src="'+ src + '"></a>';
 			return str;
@@ -168,19 +168,29 @@
 
 
 
-		var lat;
-		var lng;
+		var _lat;
+		var _lng;
 
 		function onGeoLocError() {
-			lat = 37.8715926;
-			lng = -122.2727470;
+			_lat = 37.8715926;
+			_lng = -122.2727470;
+			setupMap();
 		}
 
 		function getUserPosition(pos) {
-			lat = pos.coords.latitude;
-			lng = pos.coords.longitude;
+			_lat = pos.coords.latitude;
+			_lng = pos.coords.longitude;
+			setupMap();
 		}
 
+		function setupMap() {
+				//mMap.setCenter(new GLatLng(37.8715926,-122.2727470), 14);
+				mMap.setCenter(new GLatLng(_lat, _lng), 14);
+				GEvent.addListener(mMap, "zoomend", function() {
+					run();
+				});
+
+		}
 
 
 		function createMap() {
@@ -197,13 +207,6 @@
 				} else {
 					onGeoLocError();
 				}
-
-				map.setCenter(new GLatLng(37.8715926,-122.2727470), 14);
-				//map.setCenter(new GLatLng(lat, lng), 14);
-
-				GEvent.addListener(map, "zoomend", function() {
-					run();
-				});
 
 			}		
 		}
