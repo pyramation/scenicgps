@@ -237,15 +237,16 @@ class UserPicture(UserContent):
 
     @classmethod
     def nearby(cls, request):
-        n = getVal(request,'npics')
+        n = int(getVal(request,'npics'))
         checkhash = getVal(request,'geohash')
-        pics = cls.objects.filter(geopt__geohash__contains=checkhash)
-        try:
-            return pics[:n]
-        except:
-            return pics
         
-
+        while len(checkhash) > 0:
+            pics = cls.objects.filter(geopt__geohash__contains=checkhash)
+            if len(pics) >= n:
+                return pics[:n]
+            checkhash = checkhash[:-1]
+        return cls.objects.all()
+            
     @classmethod
     def fetchPictures(cls, request):
         pics = cls.objects.all()[:10]

@@ -43,7 +43,7 @@ class GeoPt(models.Model):
     @classmethod
     def getor(cls,request):
         pt =  getOrCreate(cls,lat=cls.getLat(request),lng=cls.getLng(request))
-        pt.geohash = self.geoHash()
+        pt.geohash = pt.geoHash()
         pt.save()
         return pt
 
@@ -237,14 +237,17 @@ class UserPicture(UserContent):
 
     @classmethod
     def nearby(cls, request):
-        n = getVal(request,'npics')
+        n = int(getVal(request,'npics'))
         checkhash = getVal(request,'geohash')
-        pics = cls.objects.filter(geopt__geohash__contains=checkhash)
-        try:
-            return pics[:n]
-        except:
-            return pics
         
+        while True:
+            try:
+                pics = cls.objects.filter(geopt__geohash__contains=checkhash)
+                return pics[:n]
+            except:
+                checkhash = checkhash[:-1]
+                if len(checkhash) == 0:
+                    return 'yes'#cls.objects.all()
 
     @classmethod
     def fetchPictures(cls, request):
