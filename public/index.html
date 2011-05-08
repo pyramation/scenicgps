@@ -160,9 +160,12 @@
 		}		
 
 		function displayContent(obj) { 
-			var str = '<span class="annotationText">'+obj.title+', heading'+obj.trueheading+'</span><br><a href="'+ obj.image + '" rel="shadowbox[Skateboarding];options={counterType:\'skip\',continuous:true,animSequence:\'sync\'}">';
+			var str = '<span class="annotationText">'+obj.title+', heading'+obj.trueheading+'</span>';
+			str += '<br>';
+			str += '<a href="'+ obj.image + '" rel="shadowbox[Skateboarding];options={counterType:\'skip\',continuous:true,animSequence:\'sync\'}">';
 			var src = (getExtension(obj.image) ==='mov') ? "images/video.png"  : obj.icon;
 			str += '<img width="50px" height="50px" src="'+ src + '"></a>';
+			str += '<img width="50px" height="50px" src="images/compass.png" style="-webkit-transform: rotate('+obj.trueheading+'deg); -moz-transform: rotate('+obj.trueheading+'deg);">';
 			return str;
 		}
 
