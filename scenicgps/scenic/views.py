@@ -37,3 +37,7 @@ def userPhotos(request):
 @getMethod
 def allUserPhotos(request):
 	return {UserPicture.SET_KEY : UserPicture.fetchAllPictures(request)}
+
+@getMethod
+def nearby(request):
+	return {UserPicture.SET_KEY : [x.toDic() for x in UserPicture.nearby(request)]}

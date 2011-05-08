@@ -2,10 +2,14 @@ from django.contrib.gis.db import models
 #from django.db import models
 import os
 from django.forms import Form as PhotoForm
+<<<<<<< HEAD
+from geohash import Geohash
+=======
 from django.contrib.gis.measure import D
 from django.contrib.gis.geos import Point
 
 
+>>>>>>> master
 def getOrCreate(cls, **kwargs):
     return cls.objects.get_or_create(**kwargs)[0]
 
@@ -28,8 +32,13 @@ def getRating(request):
 class GeoPt(models.Model):
     LATKEY = 'lat'
     LNGKEY = 'lng'
+    HASH_KEY = 'hash'
     lat = models.FloatField()
     lng = models.FloatField()
+    geohash = models.CharField(max_length = 50)
+    
+    def geoHash(self):
+        return str(Geohash((self.lat, self.lng)))
 
     def toDic(self):
         dic = {}
@@ -41,12 +50,19 @@ class GeoPt(models.Model):
     
     @classmethod
     def getor(cls,request):
+<<<<<<< HEAD
+        pt =  getOrCreate(cls,lat=cls.getLat(request),lng=cls.getLng(request))
+        pt.geohash = pt.geoHash()
+        pt.save()
+        return pt
+=======
         lat = cls.getLat(request)
         lng = cls.getLng(request)
         return getOrCreate(cls,lat=lat, lng = lng)
 
     def toPoint(self):
         return Point(self.lat,self.lng)
+>>>>>>> master
 
     @classmethod
     def getLat(cls,request):
@@ -230,7 +246,11 @@ class UserPicture(UserContent):
     def toDic(self):
         dic = super(UserPicture, self).toDic()
 <<<<<<< HEAD
+        dic.update({UserPicture.IMG_KEY:self.picURL(), UserPicture.ICON_KEY:self.iconURL(),UserPicture.MAG_KEY:self.magHeading, UserPicture.TRUE_KEY:self.trueHeading})
+=======
+<<<<<<< HEAD
         dic.update({UserPicture.IMG_KEY:self.picURL(), UserPicture.ICON_KEY:self.iconURL(), UserPicture.MAG_KEY:self.magHeading, UserPicture.TRUE_KEY:self.trueHeading})
+>>>>>>> master
         return dic
 
     @classmethod
@@ -259,6 +279,18 @@ class UserPicture(UserContent):
         pics = cls.objects.order_by('-date')
         return [pic.toDic() for pic in pics]
 
+    @classmethod
+    def nearby(cls, request):
+        n = int(getVal(request,'npics'))
+        checkhash = getVal(request,'geohash')
+        
+        while len(checkhash) > 0:
+            pics = cls.objects.filter(geopt__geohash__contains=checkhash)
+            if len(pics) >= n:
+                return pics[:n]
+            checkhash = checkhash[:-1]
+        return cls.objects.all()
+            
     @classmethod
     def fetchPictures(cls, request):
         pics = cls.objects.order_by('-date')[:10]

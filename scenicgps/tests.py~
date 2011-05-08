@@ -21,5 +21,9 @@ def testUser():
     
 def aTest():
     r = HttpRequest()
+<<<<<<< HEAD
+    r.GET = {'deviceid':'asdfasdfaasd', 'lat':'12','lng':'33','title':'tei', 'trueheading':'23', 'magheading': '42'}
+=======
     r.GET = {'deviceid':'asdfasdfaasd', 'device_id':'aasd', 'lat':'12','lng':'33','title':'tei', 'trueheading':'23', 'magheading': '42'}
+>>>>>>> master
     return UserContent.getor(r)
