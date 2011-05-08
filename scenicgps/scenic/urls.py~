@@ -9,8 +9,9 @@ urlpatterns = patterns('scenic.views',
     (r'^uploadphoto$', 'uploadPhoto'),
 <<<<<<< HEAD
     (r'^nearby$', 'nearby'),                      
-=======
->>>>>>> master
     (r'^$', 'index'),
                      
+=======
+    (r'^$', 'index'),                     
+>>>>>>> master
 )

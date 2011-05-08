@@ -2,14 +2,11 @@ from django.contrib.gis.db import models
 #from django.db import models
 import os
 from django.forms import Form as PhotoForm
-<<<<<<< HEAD
 from geohash import Geohash
-=======
-from django.contrib.gis.measure import D
 from django.contrib.gis.geos import Point
 
 
->>>>>>> master
+
 def getOrCreate(cls, **kwargs):
     return cls.objects.get_or_create(**kwargs)[0]
 
@@ -35,14 +32,10 @@ class GeoPt(models.Model):
     HASH_KEY = 'hash'
     lat = models.FloatField()
     lng = models.FloatField()
-<<<<<<< HEAD
     geohash = models.CharField(max_length = 50)
     
     def geoHash(self):
         return str(Geohash((self.lat, self.lng)))
-=======
-<<<<<<< HEAD
->>>>>>> master
 
     def toDic(self):
         dic = {}
@@ -51,8 +44,6 @@ class GeoPt(models.Model):
         return dic
 
     
-=======
->>>>>>> parent of ae20de5... icons and heading
     
     @classmethod
     def getor(cls,request):
@@ -114,6 +105,10 @@ class User(models.Model):
     DEVKEY = 'deviceid'
     device_id = models.CharField(max_length=40, unique = True)
 
+    def toDic(self):
+        return self.device_id
+
+    
     @classmethod
     def getor(cls,request):
         return getOrCreate(cls,device_id=getVal(request,cls.DEVKEY))
@@ -138,7 +133,6 @@ class RouteRating(models.Model):
 
 class ScenicContent(models.Model):
     TITLEKEY = 'title'
-<<<<<<< HEAD
     COORD_KEY = 'coord'
     DATE_KEY = 'date'
     POINT_KEY = 'point'
@@ -155,10 +149,6 @@ class ScenicContent(models.Model):
         dic[ScenicContent.COORD_KEY] = self.geopt.toDic()
         dic[ScenicContent.DATE_KEY] = str(self.date)
         return dic
-=======
-    title = models.CharField(max_length=200)
-    geopt = models.ForeignKey(GeoPt, related_name='%(app_label)s_%(class)s_related')
->>>>>>> parent of ae20de5... icons and heading
 
     @classmethod
     def getor(cls,request):
@@ -213,38 +203,49 @@ class PanoramioContent(ScenicContent):
 
 class UserContent(ScenicContent):
     user = models.ForeignKey(User)
-
+    USER_KEY = 'user'
+    
     @classmethod
     def getor(cls, request):
-        return  getOrCreate(cls, **cls.getkwargs(request))
+        kws = cls.getkwargs(request)
+        print kws['point']
+        content = getOrCreate(cls, **kws)
+        print content
+        return content
 
+    def toDic(self):
+        dic = super(UserContent,self).toDic()
+        dic.update({UserContent.USER_KEY: self.user.toDic()})
+        return dic
+    
     @classmethod
     def getkwargs(cls, request):
         kw = cls.__bases__[0].getkwargs(request)
-        print kw['point'].x
         kw['user'] = User.getor(request)
         return kw
 
 
+def get_image_path(instance, filename):
+    return os.path.join('photos',str(instance.id),filename)
 
 class UserPicture(UserContent):
-<<<<<<< HEAD
     picture = models.ImageField(upload_to=get_image_path,blank=False)
+<<<<<<< HEAD
     icon = models.ImageField(upload_to=get_image_path, blank=False)
     magHeading = models.FloatField()
     trueHeading = models.FloatField()
     
+=======
+>>>>>>> parent of ae20de5... icons and heading
     IMG_KEY = 'image'
-    ICON_KEY = 'icon'
     SET_KEY = 'photos'
-    TRUE_KEY = 'trueheading'
-    MAG_KEY = 'magheading'
 
     def toDic(self):
         dic = super(UserPicture, self).toDic()
 <<<<<<< HEAD
         dic.update({UserPicture.IMG_KEY:self.picURL(), UserPicture.ICON_KEY:self.iconURL(),UserPicture.MAG_KEY:self.magHeading, UserPicture.TRUE_KEY:self.trueHeading})
 =======
+<<<<<<< HEAD
         dic.update({UserPicture.IMG_KEY:self.picURL(), UserPicture.ICON_KEY:self.iconURL(), UserPicture.MAG_KEY:self.magHeading, UserPicture.TRUE_KEY:self.trueHeading})
 >>>>>>> master
         return dic
@@ -262,6 +263,11 @@ class UserPicture(UserContent):
         except:
             return 'http://www.scenicgps.com/images/video.png'
 
+=======
+        dic.update({UserPicture.IMG_KEY:self.picURL()})
+        return dic
+
+>>>>>>> parent of ae20de5... icons and heading
     def picURL(self):
         return 'http://www.scenicgps.com' + self.picture.url
 
@@ -275,15 +281,13 @@ class UserPicture(UserContent):
         n = int(getVal(request,'npics'))
         checkhash = getVal(request,'geohash')
         
-        while True:
-            try:
-                pics = cls.objects.filter(geopt__geohash__contains=checkhash)
+        while len(checkhash) > 0:
+            pics = cls.objects.filter(geopt__geohash__contains=checkhash)
+            if len(pics) >= n:
                 return pics[:n]
-            except:
-                checkhash = checkhash[:-1]
-                if len(checkhash) == 0:
-                    return 'yes'#cls.objects.all()
-
+            checkhash = checkhash[:-1]
+        return cls.objects.all()
+            
     @classmethod
     def fetchPictures(cls, request):
         pics = cls.objects.order_by('-date')[:10]
@@ -292,10 +296,6 @@ class UserPicture(UserContent):
     @classmethod
     def putPhoto(cls, request):
 <<<<<<< HEAD
-        content = getOrCreate(cls, **UserPicture.getkwargs(request))
-        content.magHeading = getVal(request, cls.MAG_KEY)
-        content.trueHeading = getVal(request, cls.TRUE_KEY)
-=======
         #content = getOrCreate(cls, **UserPicture.getkwargs(request))
         #content.magHeading = getVal(request, cls.MAG_KEY)
         #content.trueHeading = getVal(request, cls.TRUE_KEY)
@@ -310,21 +310,7 @@ class UserPicture(UserContent):
         point = geopt.toPoint()
         content = UserPicture(user = user, geopt = geopt, title = title, point = point, trueHeading = th, magHeading = mh)
 =======
-
-    @staticmethod
-    def get_image_path(instance, filename):
-        return os.path.join('photos',str(instance.id),filename)
-
-
-
-    picture = models.ImageField(upload_to=get_image_path,blank=False)
-    IMG_KEY = 'image'
-
-
-    @classmethod
-    def putPhoto(cls, request):
         content = getOrCreate(cls, **UserContent.getkwargs(request))
->>>>>>> master
         image = cls.getImage(request)
 >>>>>>> parent of ae20de5... icons and heading
         content.save()

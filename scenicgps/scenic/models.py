@@ -2,14 +2,11 @@ from django.contrib.gis.db import models
 #from django.db import models
 import os
 from django.forms import Form as PhotoForm
-<<<<<<< HEAD
 from geohash import Geohash
-=======
-from django.contrib.gis.measure import D
 from django.contrib.gis.geos import Point
 
 
->>>>>>> master
+
 def getOrCreate(cls, **kwargs):
     return cls.objects.get_or_create(**kwargs)[0]
 
@@ -50,19 +47,10 @@ class GeoPt(models.Model):
     
     @classmethod
     def getor(cls,request):
-<<<<<<< HEAD
         pt =  getOrCreate(cls,lat=cls.getLat(request),lng=cls.getLng(request))
         pt.geohash = pt.geoHash()
         pt.save()
         return pt
-=======
-        lat = cls.getLat(request)
-        lng = cls.getLng(request)
-        return getOrCreate(cls,lat=lat, lng = lng)
-
-    def toPoint(self):
-        return Point(self.lat,self.lng)
->>>>>>> master
 
     @classmethod
     def getLat(cls,request):
@@ -233,32 +221,16 @@ def get_image_path(instance, filename):
 
 class UserPicture(UserContent):
     picture = models.ImageField(upload_to=get_image_path,blank=False)
-<<<<<<< HEAD
     icon = models.ImageField(upload_to=get_image_path, blank=False)
     magHeading = models.FloatField()
     trueHeading = models.FloatField()
-    
-=======
->>>>>>> parent of ae20de5... icons and heading
     IMG_KEY = 'image'
     SET_KEY = 'photos'
 
     def toDic(self):
         dic = super(UserPicture, self).toDic()
-<<<<<<< HEAD
         dic.update({UserPicture.IMG_KEY:self.picURL(), UserPicture.ICON_KEY:self.iconURL(),UserPicture.MAG_KEY:self.magHeading, UserPicture.TRUE_KEY:self.trueHeading})
-=======
-<<<<<<< HEAD
-        dic.update({UserPicture.IMG_KEY:self.picURL(), UserPicture.ICON_KEY:self.iconURL(), UserPicture.MAG_KEY:self.magHeading, UserPicture.TRUE_KEY:self.trueHeading})
->>>>>>> master
         return dic
-
-    @classmethod
-    def around(cls, request):
-        n = int(getVal(request, 'npics'))
-        km = float(getVal(request, 'km'))
-        point = GeoPt.getPoint(request)
-        return cls.objects.filter(point__distance_lte=(point,D(km))).order_by('-date')[:n]
 
     def iconURL(self):
         try:
@@ -266,11 +238,7 @@ class UserPicture(UserContent):
         except:
             return 'http://www.scenicgps.com/images/video.png'
 
-=======
-        dic.update({UserPicture.IMG_KEY:self.picURL()})
-        return dic
 
->>>>>>> parent of ae20de5... icons and heading
     def picURL(self):
         return 'http://www.scenicgps.com' + self.picture.url
 
@@ -298,33 +266,15 @@ class UserPicture(UserContent):
 
     @classmethod
     def putPhoto(cls, request):
-<<<<<<< HEAD
-        #content = getOrCreate(cls, **UserPicture.getkwargs(request))
-        #content.magHeading = getVal(request, cls.MAG_KEY)
-        #content.trueHeading = getVal(request, cls.TRUE_KEY)
-        #content.save()
-        user = User.getor(request)
-        user.save()
-        geopt = GeoPt.getor(request)
-        geopt.save()
-        title = getVal(request, 'title')
-        th = getVal(request, 'trueheading')
-        mh = getVal(request, 'magheading')
-        point = geopt.toPoint()
-        content = UserPicture(user = user, geopt = geopt, title = title, point = point, trueHeading = th, magHeading = mh)
-=======
         content = getOrCreate(cls, **UserContent.getkwargs(request))
-        image = cls.getImage(request)
->>>>>>> parent of ae20de5... icons and heading
+        content.magHeading = float(getVal(request, cls.MAG_KEY))
+        content.trueHeading = float(getVal(request, cls.TRUE_KEY))
         content.save()
         image = cls.getImage(request)
         content.picture.save(image.name, image)
-<<<<<<< HEAD
         icon = cls.getIcon(request)
         content.icon.save(icon.name, icon)
         content.save()
-=======
->>>>>>> parent of ae20de5... icons and heading
 
 
     @classmethod

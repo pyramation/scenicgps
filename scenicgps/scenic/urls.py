@@ -7,11 +7,6 @@ urlpatterns = patterns('scenic.views',
     (r'^getallphotos$','allUserPhotos'),
     (r'^lastroute$','lastRoute'),
     (r'^uploadphoto$', 'uploadPhoto'),
-<<<<<<< HEAD
     (r'^nearby$', 'nearby'),                      
     (r'^$', 'index'),
-                     
-=======
-    (r'^$', 'index'),                     
->>>>>>> master
 )
