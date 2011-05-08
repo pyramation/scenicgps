@@ -1,12 +1,8 @@
-from django.contrib.gis.db import models
-#from django.db import models
+#from django.contrib.gis.db import models
+from django.db import models
 import os
 from django.forms import Form as PhotoForm
 from geohash import Geohash
-from django.contrib.gis.geos import Point
-
-
-
 def getOrCreate(cls, **kwargs):
     return cls.objects.get_or_create(**kwargs)[0]
 
@@ -16,6 +12,7 @@ def getVal(request,key):
         if isinstance(result,str) or isinstance(result,unicode):
             return result
         result =  result[0]
+        asdfasd
     except:
         return None
 
@@ -42,8 +39,6 @@ class GeoPt(models.Model):
         dic[GeoPt.LATKEY] = self.lat
         dic[GeoPt.LNGKEY] = self.lng
         return dic
-
-    
     
     @classmethod
     def getor(cls,request):
@@ -125,24 +120,19 @@ class RouteRating(models.Model):
 class ScenicContent(models.Model):
     TITLEKEY = 'title'
     COORD_KEY = 'coord'
-    DATE_KEY = 'date'
-    POINT_KEY = 'point'
-    
     title = models.CharField(max_length=200)
     geopt = models.ForeignKey(GeoPt, related_name='%(app_label)s_%(class)s_related')
-    date = models.DateTimeField(auto_now=True)
-    point = models.PointField()
-    objects = models.GeoManager()
-    
+
+
     def toDic(self):
         dic = {}
         dic[ScenicContent.TITLEKEY] = self.title
         dic[ScenicContent.COORD_KEY] = self.geopt.toDic()
-        dic[ScenicContent.DATE_KEY] = str(self.date)
         return dic
 
     @classmethod
     def getor(cls,request):
+        
         content = getOrCreate(cls, **cls.getkwargs(request))
         return content
 
@@ -150,8 +140,7 @@ class ScenicContent(models.Model):
     def getkwargs(cls,request):
         title = getVal(request,cls.TITLEKEY)
         geopt = GeoPt.getor(request)
-        point = geopt.toPoint()
-        return {'title':title,'geopt':geopt, 'point': point}
+        return {'title':title,'geopt':geopt}
         
 
     def rate(self, request):
@@ -198,10 +187,9 @@ class UserContent(ScenicContent):
     
     @classmethod
     def getor(cls, request):
-        kws = cls.getkwargs(request)
-        print kws['point']
-        content = getOrCreate(cls, **kws)
-        print content
+        user = User.getor(request)
+        content = getOrCreate(cls, **ScenicContent.getkwargs(request))
+        content.user = user
         return content
 
     def toDic(self):
@@ -225,7 +213,11 @@ class UserPicture(UserContent):
     magHeading = models.FloatField()
     trueHeading = models.FloatField()
     IMG_KEY = 'image'
+    ICON_KEY = 'icon'
     SET_KEY = 'photos'
+    TRUE_KEY = 'trueheading'
+    MAG_KEY = 'magheading'
+
 
     def toDic(self):
         dic = super(UserPicture, self).toDic()
@@ -233,18 +225,14 @@ class UserPicture(UserContent):
         return dic
 
     def iconURL(self):
-        try:
-            return 'http://www.scenicgps.com' + self.icon.url
-        except:
-            return 'http://www.scenicgps.com/images/video.png'
-
+        return 'http://www.scenicgps.com' + self.icon.url
 
     def picURL(self):
         return 'http://www.scenicgps.com' + self.picture.url
 
     @classmethod
     def fetchAllPictures(cls, request):
-        pics = cls.objects.order_by('-date')
+        pics = cls.objects.all()
         return [pic.toDic() for pic in pics]
 
     @classmethod
@@ -261,21 +249,27 @@ class UserPicture(UserContent):
             
     @classmethod
     def fetchPictures(cls, request):
-        pics = cls.objects.order_by('-date')[:10]
+        pics = cls.objects.all()[:10]
         return [pic.toDic() for pic in pics]
 
     @classmethod
     def putPhoto(cls, request):
-        content = getOrCreate(cls, **UserContent.getkwargs(request))
-        content.magHeading = float(getVal(request, cls.MAG_KEY))
-        content.trueHeading = float(getVal(request, cls.TRUE_KEY))
-        content.save()
+        content = getOrCreate(cls, **UserPicture.getkwargs(request))
+        content.magHeading = getVal(request, cls.MAG_KEY)
+        content.trueHeading = getVal(request, cls.TRUE_KEY)
         image = cls.getImage(request)
-        content.picture.save(image.name, image)
         icon = cls.getIcon(request)
+        content.save()
+        content.picture.save(image.name, image)
         content.icon.save(icon.name, icon)
         content.save()
 
+    @classmethod
+    def getkwargs(cls, request):
+        kw = cls.__bases__[0].getkwargs(request)
+        kw['magHeading'] = getVal(request,cls.MAG_KEY)
+        kw['trueHeading'] = getVal(request,cls.TRUE_KEY)
+        return kw
 
     @classmethod
     def getImage(cls,request):
@@ -284,6 +278,15 @@ class UserPicture(UserContent):
             if form.is_valid():
                 image_file = request.FILES[cls.IMG_KEY]
                 return image_file
+
+    @classmethod
+    def getIcon(cls,request): 
+        if request.method == 'POST':
+            form = PhotoForm(request.POST, request.FILES)
+            if form.is_valid():
+                image_file = request.FILES[cls.ICON_KEY]
+                return image_file
+       
                 
 
 class UserComment(UserContent):
